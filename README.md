@@ -15,6 +15,6 @@
 
 #### 图片
 
-![img](file:///C:\Users\tko18\Documents\Tencent Files\870993238\Image\Group2\Z_\R1\Z_R1B${EJ7Y6[L3MAUFZW5C.jpg)
+![img](.\Img\Z_R1B${EJ7Y6[L3MAUFZW5C.jpg)
 
-![img](file:///C:\Users\tko18\Documents\Tencent Files\870993238\Image\Group2\1F\U5\1FU5XUGN8L$@3T$NI40B4QX.png)
+![img](.\Img\1FU5XUGN8L$@3T$NI40B4QX.png)
