@@ -27,12 +27,17 @@ void draw_rect(float A_0, float A_1, float A_2, float A_3, int A_4, int A_5, int
 {
 	GRAPHICS::DRAW_RECT((A_0 + (A_2 * 0.5f)), (A_1 + (A_3 * 0.5f)), A_2, A_3, A_4, A_5, A_6, A_7);
 }
+void PlayFrontend(const std::string& sound_dict, const std::string& sound_name)
+{
+	AUDIO::PLAY_SOUND_FRONTEND(-1, const_cast<PCHAR>(sound_name.c_str()), const_cast<PCHAR>(sound_dict.c_str()), FALSE);
+}
+
 //					std:：字符串标题，				行宽度，				行高，			行顶，			行左，		文本左，			活动，		标题，		重缩放文本=true
 void draw_menu_line(std::string caption, float lineWidth, float lineHeight, float lineTop, float lineLeft, float textLeft, bool active, bool title, bool rescaleText = true)
 {
 	// default values
-	int text_col[4] = { 0, 7, 9, 200 }, //字体颜色
-		rect_col[4] = { 253, 253, 253, 150 }; //选择框颜色
+	int text_col[4] = { 255, 255, 255, 200 }, //字体颜色
+		rect_col[4] = { 1, 2, 3, 150 }; //选择框颜色
 	float text_scale = 0.35;
 	int font = 0;
 
@@ -45,9 +50,9 @@ void draw_menu_line(std::string caption, float lineWidth, float lineHeight, floa
 		text_col[2] = 255;
 
 		//选中状态框色
-		rect_col[0] = 115;//199
-		rect_col[1] = 100;//200
-		rect_col[2] = 119;//0
+		rect_col[0] = 138;//115//199
+		rect_col[1] = 3;//100//200
+		rect_col[2] = 3;//119//0
 
 		if (rescaleText) text_scale = 0.40;
 	}
@@ -65,23 +70,23 @@ void draw_menu_line(std::string caption, float lineWidth, float lineHeight, floa
 	}
 	//底部文本框颜色
 	if (Bottom) {
-		rect_col[0] = 120;//128
-		rect_col[1] = 119;//149
-		rect_col[2] = 133;//154
+		rect_col[0] = 138;//128
+		rect_col[1] = 3;//149
+		rect_col[2] = 3;//154
 
 		//标题字体颜色
-		text_col[0] = 237;
-		text_col[1] = 167;
-		text_col[2] = 167;
+		text_col[0] = 255;
+		text_col[1] = 255;
+		text_col[2] = 255;
 		//透明的
 		rect_col[3] = 255;
 	}
 	if (title)
 	{
 		//标题头颜色
-		rect_col[0] = 139;//191//201
-		rect_col[1] = 145;//83//222
-		rect_col[2] = 171;//132//241
+		rect_col[0] = 138;//139//191//201
+		rect_col[1] = 3;//145//83//222
+		rect_col[2] = 3;//171//132//241
 		//标题字体颜色
 		text_col[0] = 255;
 		text_col[1] = 255;
@@ -1016,6 +1021,12 @@ int activeLineIndexPlayer = 0;
 
 void process_player_menu()
 {
+	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
+	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"玩家选项已打开");
+	// 提示声音
+	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
+
+	UI::_DRAW_NOTIFICATION(0, 0);
 	const float lineWidth = 250.0;
 	const int lineCount = 15;
 
@@ -1052,15 +1063,17 @@ void process_player_menu()
 		{
 			// 绘图菜单
 			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME					   %d / %d", activeLineIndexPlayer + 1, lineCount);
 			about = true;//启用独有约束色
-			draw_menu_line("HOME						VIP", lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
 			about = false;//关闭独有约束色
 			for (int i = 0; i < lineCount; i++)
 				if (i != activeLineIndexPlayer)
 					draw_menu_line(line_as_str(lines[i].text, lines[i].pState),
-						lineWidth, 9.0, 92. + i * 36.0, 25.0, 9.0, false, false);
+						lineWidth, 5.0, 91. + i * 27.5, 25.0, 9.0, false, false);
 			draw_menu_line(line_as_str(lines[activeLineIndexPlayer].text, lines[activeLineIndexPlayer].pState),
-				lineWidth , 9.0, 92. + activeLineIndexPlayer * 36.0, 25.0, 9.0, true, false);
+				lineWidth , 5.0, 91. + activeLineIndexPlayer * 27.5, 25.0, 9.0, true, false);
 
 			update_features();
 			WAIT(0);
@@ -1182,6 +1195,12 @@ int activeLineIndexWeapon = 0;
 
 void process_weapon_menu()
 {
+	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
+	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"武器选项已打开");
+	// 提示声音
+	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
+
+	UI::_DRAW_NOTIFICATION(0, 0);
 	const float lineWidth = 250.0;
 	const int lineCount = 6;
 
@@ -1225,15 +1244,17 @@ void process_weapon_menu()
 		{
 			// draw menu
 			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexWeapon + 1, lineCount);
 			about = true;//启用独有约束色
-			draw_menu_line("HOME						VIP", lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
 			about = false;//关闭独有约束色
 			for (int i = 0; i < lineCount; i++)
 				if (i != activeLineIndexWeapon)
 					draw_menu_line(line_as_str(lines[i].text, lines[i].pState),
-						lineWidth, 9.0, 92. + i * 36.0, 25.0, 9.0, false, false);
+						lineWidth, 5.0, 91. + i * 27.5, 25.0, 9.0, false, false);
 			draw_menu_line(line_as_str(lines[activeLineIndexWeapon].text, lines[activeLineIndexWeapon].pState),
-				lineWidth , 9.0, 92. + activeLineIndexWeapon * 36.0, 25.0, 9.0, true, false);
+				lineWidth , 5.0, 91. + activeLineIndexWeapon * 27.5, 25.0, 9.0, true, false);
 
 			update_features();
 			WAIT(0);
@@ -1355,7 +1376,7 @@ bool process_carspawn_menu()
 		{
 			// draw menu
 			char caption[32];
-			sprintf_s(caption, "CAR SPAWNER   %d / %d", carspawnActiveLineIndex + 1, lineCount);
+			sprintf_s(caption, u8"汽车产卵器   %d / %d", carspawnActiveLineIndex + 1, lineCount);
 			draw_menu_line(caption, 350.0, 15.0, 18.0, 0.0, 5.0, false, true);
 			for (int i = 0; i < itemCount; i++)
 				if (strlen(vehicleModels[carspawnActiveLineIndex][i]))
@@ -1453,6 +1474,12 @@ int activeLineIndexVeh = 0;
 
 void process_veh_menu()
 {
+	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
+	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"交通选项已打开");
+	// 提示声音
+	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
+
+	UI::_DRAW_NOTIFICATION(0, 0);
 	const float lineWidth = 250.0;
 	const int lineCount = 8;
 
@@ -1482,15 +1509,17 @@ void process_veh_menu()
 		{
 			// draw menu
 			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexVeh + 1, lineCount);
 			about = true;//启用独有约束色
-			draw_menu_line("HOME						VIP", lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
 			about = false;//关闭独有约束色
 			for (int i = 0; i < lineCount; i++)
 				if (i != activeLineIndexVeh)
 					draw_menu_line(line_as_str(lines[i].text, lines[i].pState),
-						lineWidth, 9.0, 92. + i * 36.0, 25.0, 9.0, false, false);
+						lineWidth, 5.0, 91. + i * 27.5, 25.0, 9.0, false, false);
 			draw_menu_line(line_as_str(lines[activeLineIndexVeh].text, lines[activeLineIndexVeh].pState),
-				lineWidth, 9.0, 92. + activeLineIndexVeh * 36.0, 25.0, 9.0, true, false);
+				lineWidth, 5.0, 91. + activeLineIndexVeh * 27.5, 25.0, 9.0, true, false);
 
 			update_features();
 			WAIT(0);
@@ -1577,6 +1606,13 @@ int activeLineIndexWorld = 0;
 
 void process_world_menu()
 {
+	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
+	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"世界选项已打开");
+	// 提示声音
+	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
+
+	UI::_DRAW_NOTIFICATION(0, 0);
+
 	const float lineWidth = 250.0;
 	const int lineCount = 5;
 
@@ -1603,15 +1639,17 @@ void process_world_menu()
 		{
 			// draw menu
 			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexWorld + 1, lineCount);
 			about = true;//启用独有约束色
-			draw_menu_line("HOME						VIP", lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
 			about = false;//关闭独有约束色
 			for (int i = 0; i < lineCount; i++)
 				if (i != activeLineIndexWorld)
 					draw_menu_line(line_as_str(lines[i].text, lines[i].pState),
-						lineWidth, 9.0, 92. + i * 36.0, 25.0, 9.0, false, false);
+						lineWidth, 5.0, 91. + i * 27.5, 25.0, 9.0, false, false);
 			draw_menu_line(line_as_str(lines[activeLineIndexWorld].text, lines[activeLineIndexWorld].pState),
-				lineWidth , 9.0, 92. + activeLineIndexWorld * 36.0, 25.0, 9.0, true, false);
+				lineWidth , 5.0, 91. + activeLineIndexWorld * 27.5, 25.0, 9.0, true, false);
 
 			update_features();
 			WAIT(0);
@@ -1680,6 +1718,13 @@ int activeLineIndexTime = 0;
 
 void process_time_menu()
 {
+	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
+	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"时间选项已打开");
+	// 提示声音
+	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
+
+	UI::_DRAW_NOTIFICATION(0, 0);
+
 	const float lineWidth = 250.0;
 	const int lineCount = 4;
 
@@ -1705,15 +1750,17 @@ void process_time_menu()
 		{
 			// draw menu
 			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexTime + 1, lineCount);
 			about = true;//启用独有约束色
-			draw_menu_line("HOME						VIP", lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
 			about = false;//关闭独有约束色
 			for (int i = 0; i < lineCount; i++)
 				if (i != activeLineIndexTime)
 					draw_menu_line(line_as_str(lines[i].text, lines[i].pState),
-						lineWidth, 9.0, 92. + i * 36.0, 25.0, 9.0, false, false);
+						lineWidth, 5.0, 91. + i * 27.5, 25.0, 9.0, false, false);
 			draw_menu_line(line_as_str(lines[activeLineIndexTime].text, lines[activeLineIndexTime].pState),
-				lineWidth , 9.0, 92. + activeLineIndexTime * 36.0, 25.0, 9.0, true, false);
+				lineWidth , 5.0, 91. + activeLineIndexTime * 27.5, 25.0, 9.0, true, false);
 
 			update_features();
 			WAIT(0);
@@ -1813,21 +1860,30 @@ void process_weather_menu()
 	DWORD waitTime = 150;
 	while (true)
 	{
+
+		UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
+		UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"天气选项已打开");
+		// 提示声音
+		PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
+
+		UI::_DRAW_NOTIFICATION(0, 0);
 		// timed menu draw, used for pause after active line switch
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
 			// draw menu
 			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexWeather + 1, lineCount);
 			about = true;//启用独有约束色
-			draw_menu_line("HOME						VIP", lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
 			about = false;//关闭独有约束色
 			for (int i = 0; i < lineCount; i++)
 				if (i != activeLineIndexWeather)
 					draw_menu_line(line_as_str(lines[i].text, lines[i].pState),
-						lineWidth, 9.0, 92. + i * 36.0, 25.0, 9.0, false, false);
+						lineWidth, 5.0, 91. + i * 27.5, 25.0, 9.0, false, false);
 			draw_menu_line(line_as_str(lines[activeLineIndexWeather].text, lines[activeLineIndexWeather].pState),
-				lineWidth, 9.0, 92. + activeLineIndexWeather * 36.0, 25.0, 9.0, true, false);
+				lineWidth, 5.0, 91. + activeLineIndexWeather * 27.5, 25.0, 9.0, true, false);
 
 			update_features();
 			WAIT(0);
@@ -1908,6 +1964,12 @@ int activeLineIndexMisc = 0;
 
 void process_misc_menu()
 {
+	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
+	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"杂项选项已打开");
+	// 提示声音
+	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
+
+	UI::_DRAW_NOTIFICATION(0, 0);
 	const float lineWidth = 250.0;
 	const int lineCount = 2;
 
@@ -1932,15 +1994,17 @@ void process_misc_menu()
 		{
 			// draw menu
 			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexMisc + 1, lineCount);
 			about = true;//启用独有约束色
-			draw_menu_line("HOME						VIP", lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
 			about = false;//关闭独有约束色
 			for (int i = 0; i < lineCount; i++)
 				if (i != activeLineIndexMisc)
 					draw_menu_line(line_as_str(lines[i].text, lines[i].pState),
-						lineWidth, 9.0, 92. + i * 36.0, 25.0, 9.0, false, false);
+						lineWidth, 5.0, 91. + i * 27.5, 25.0, 9.0, false, false);
 			draw_menu_line(line_as_str(lines[activeLineIndexMisc].text, lines[activeLineIndexMisc].pState),
-				lineWidth, 9.0, 92. + activeLineIndexMisc * 36.0, 25.0, 9.0, true, false);
+				lineWidth, 5.0, 91. + activeLineIndexMisc * 27.5, 25.0, 9.0, true, false);
 
 			update_features();
 			WAIT(0);
@@ -1998,6 +2062,14 @@ void process_misc_menu()
 }
 int activeLineIndexModel = 0;
 void process_model_menu() {
+
+	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
+	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"模型选项已打开");
+	// 提示声音
+	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
+
+	UI::_DRAW_NOTIFICATION(0, 0);
+
 	const float lineWidth = 250.0;
 	const int lineCount = 10;
 
@@ -2027,15 +2099,17 @@ void process_model_menu() {
 		do
 		{
 			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexModel + 1, lineCount);
 			about = true;//启用独有约束色
-			draw_menu_line("HOME						VIP", lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
 			about = false;//关闭独有约束色
 			for (int i = 0; i < lineCount; i++)
 				if (i != activeLineIndexModel)
 					draw_menu_line(line_as_str(lines[i].text, lines[i].pState),
-						lineWidth, 9.0, 92. + i * 36.0, 25.0, 9.0, false, false);
+						lineWidth, 5.0, 91. + i * 27.5, 25.0, 9.0, false, false);
 			draw_menu_line(line_as_str(lines[activeLineIndexModel].text, lines[activeLineIndexModel].pState),
-				lineWidth, 9.0, 92. + activeLineIndexModel * 36.0, 25.0, 9.0, true, false);
+				lineWidth, 5.0, 91. + activeLineIndexModel * 27.5, 25.0, 9.0, true, false);
 
 			update_features();
 			WAIT(0);
@@ -2092,10 +2166,37 @@ void process_model_menu() {
 
 int activeLineIndexMain = 0;
 
+
+
 void process_main_menu()
 {
 		//测试 套现成功
 		//UI::_SET_SINGLEPLAYER_HUD_CASH(12000, 0);
+
+	//char statusText[32];
+	//sprintf_s(statusText, u8"");
+	//set_status_text(statusText);
+
+	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
+	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"GTA5 1.58 线下版本 免费使用");
+	// 提示声音
+	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
+
+	UI::_DRAW_NOTIFICATION(0, 0);
+
+	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
+	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"作者QQ：870993238");
+	// 提示声音
+	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
+
+	UI::_DRAW_NOTIFICATION(0, 0);
+
+	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
+	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"官网：https://q-tai-mu.github.io");
+	// 提示声音
+	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
+
+	UI::_DRAW_NOTIFICATION(0, 0);
 	
 	const float lineWidth = 250.0;
 	const int lineCount = 9;
@@ -2113,15 +2214,15 @@ weather
 other
 	*/
 	static LPCSTR lineCaption[lineCount] = {
-		u8"玩家选项 					   >>",
-		u8"武器功能					   >>",
-		u8"交通选项					   >>",
-		u8"世界功能					   >>",
-		u8"时间选项					   >>",
-		u8"天气功能					   >>",
-		u8"杂项选项					   >>",
-		u8"模型功能					   >>",
-		u8"菜单选项					   >>",
+		u8"玩家选项					          >",
+		u8"武器功能					          >",
+		u8"交通选项					          >",
+		u8"世界功能					          >",
+		u8"时间选项					          >",
+		u8"天气功能					          >",
+		u8"杂项选项					          >",
+		u8"模型功能					          >",
+		u8"菜单选项					          >",
 	};
 
 	DWORD waitTime = 150;
@@ -2134,22 +2235,24 @@ other
 			// 绘图菜单      字符串标题，行宽度，  行高，  行顶， 行左，文本左，活动，标题
 			float titleValue = 0.0;
 			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexMain + 1, lineCount);
 			about = true;//启用独有约束色
-			draw_menu_line("HOME						VIP", lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
 			about = false;//关闭独有约束色
 			for (int i = 0; i < lineCount; i++)
 				if (i != activeLineIndexMain)
 					if (i != 9)
-						draw_menu_line(lineCaption[i], lineWidth, 9.0, 92. + i * 36.0, 25.0, 9.0, false, false);
+						draw_menu_line(lineCaption[i], lineWidth, 5.0, 91. + i * 27.5, 25.0, 9.0, false, false);
 					else{
 						
-						draw_menu_line(lineCaption[i], lineWidth, 9.0, 92. + i * 36.0, 25.0, 9.0, false, false);
+						draw_menu_line(lineCaption[i], lineWidth, 5.0, 91. + i * 27.5, 25.0, 9.0, false, false);
 						
 					}
-			draw_menu_line(lineCaption[activeLineIndexMain], lineWidth, 9.0, 92. + activeLineIndexMain * 36.0, 25.0, 9.0, true, false);
+			draw_menu_line(lineCaption[activeLineIndexMain], lineWidth, 5.0, 91. + activeLineIndexMain * 27.5, 25.0, 9.0, true, false);
 			
 			Bottom = true;
-			draw_menu_line("1.58   	   NEVERLOSE VIP		2.10", lineWidth, 9.0, 410.0, 25.0, 5.0, false, false);
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 340.0, 25.0, 5.0, false, false);
 			Bottom = false;
 
 			update_features();
