@@ -15,9 +15,10 @@
 
 #include "script.h"
 #include "keyboard.h"
-
 #include <string>
 #include <ctime>
+
+#include <iostream>
 
 #pragma warning(disable : 4244 4305) // double <-> float conversions
 bool about = false;//约束提示框背景色是否渲染
@@ -146,6 +147,9 @@ void draw_menu_line(std::string caption, float lineWidth, float lineHeight, floa
 		rect_col[0], rect_col[1], rect_col[2], rect_col[3]);
 }
 
+
+
+
 bool trainer_switch_pressed()
 {
 
@@ -175,6 +179,7 @@ void update_status_text()
 {
 	if (GetTickCount() < statusTextDrawTicksMax)
 	{
+
 		UI::SET_TEXT_FONT(0);
 		UI::SET_TEXT_SCALE(0.55, 0.55);
 		UI::SET_TEXT_COLOUR(255, 255, 255, 255);
@@ -253,6 +258,8 @@ bool featureVehSeatbelt = false;
 bool featureVehSeatbeltUpdated = false;
 bool featureVehSpeedBoost = false;
 bool featureVehWrapInSpawned = false;
+bool featureVehmotorcycle = false;
+bool featureVenaircraft = false;
 
 bool featureWorldMoonGravity = false;
 bool featureWorldRandomCops = true;
@@ -1017,6 +1024,2853 @@ std::string line_as_str(std::string text, bool* pState)
 	return text + (pState ? (*pState ? " [ON]" : " [OFF]") : "");
 }
 
+
+int activeLineIndexMotorcycle = 0;
+int activeLineIndexMotorcycleItem = 0;
+LPCSTR motorcycles[2][10] = {
+	{"AKUMA","DOUBLE","THRUST","VINDICATOR","HEXER","INNOVATION","SANCHEZ2","SANCHEZ","CARBONRS","BATI"},
+	{"BATI2","RUFFIAN","LECTRO","NEMESIS","FAGGIO2","HAKUCHOU","PCJ","VADER","BAGGER","DAEMON"}
+	
+};
+bool process_motorcycle_menu() {
+	DWORD waitTime = 150;
+	const int lineCount = 2;
+	const int itemCount = 10;
+	const int itemCountLastLine = 10;
+	const float lineWidth = 250.0;
+	while (true)
+	{
+		// timed menu draw, used for pause after active line switch
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			// draw menu
+			draw_menu_line(u8"摩托车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexMotorcycle + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(motorcycles[activeLineIndexMotorcycle][i]))
+					draw_menu_line(motorcycles[activeLineIndexMotorcycle][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(motorcycles[activeLineIndexMotorcycle][activeLineIndexMotorcycleItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexMotorcycleItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 368.5, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = motorcycles[activeLineIndexMotorcycle][activeLineIndexMotorcycleItem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+
+				if (featureVehmotorcycle)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+				
+					menu_beep();
+					activeLineIndexMotorcycle++;
+					if (activeLineIndexMotorcycle == lineCount)
+						activeLineIndexMotorcycle = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexMotorcycle == 0)
+							activeLineIndexMotorcycle = lineCount;
+						activeLineIndexMotorcycle--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexMotorcycleItem == 0)
+								activeLineIndexMotorcycleItem = (activeLineIndexMotorcycle == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexMotorcycleItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexMotorcycleItem++;
+								int itemsMax = (activeLineIndexMotorcycle == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexMotorcycleItem == itemsMax)
+									activeLineIndexMotorcycleItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexMotorcycle == (lineCount - 1))
+			if (activeLineIndexMotorcycleItem >= itemCountLastLine)
+				activeLineIndexMotorcycleItem = 0;
+	}
+	return false;
+}
+
+
+int activeLineIndexaircraft = 0;
+int activeLineIndexaircraftItem = 0;
+
+LPCSTR aircraft[3][5] = {
+	{"CARGOPLANE","JET","LUXOR","LUXOR2","MILJET"},
+	{"SHAMAL","VESTRA","MAMMATUS","LAZER","VELUM"},
+	{"VELUM2","DODO","TITAN","BESRA","CUBAN800"}
+};
+
+bool process_aircraft_menu() {
+
+	DWORD waitTime = 150;
+	const int lineCount = 3;
+	const int itemCount = 5;
+	const int itemCountLastLine = 5;
+	const float lineWidth = 250.0;
+	while (true)
+	{
+		// timed menu draw, used for pause after active line switch
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			// draw menu
+			draw_menu_line(u8"飞机", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexaircraft + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(aircraft[activeLineIndexaircraft][i]))
+					draw_menu_line(aircraft[activeLineIndexaircraft][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(aircraft[activeLineIndexaircraft][activeLineIndexaircraftItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexaircraftItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 230.0, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = aircraft[activeLineIndexaircraft][activeLineIndexaircraftItem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+
+				if (featureVenaircraft)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexaircraft++;
+					if (activeLineIndexaircraft == lineCount)
+						activeLineIndexaircraft = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexaircraft == 0)
+							activeLineIndexaircraft = lineCount;
+						activeLineIndexaircraft--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexaircraftItem == 0)
+								activeLineIndexaircraftItem = (activeLineIndexaircraft == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexaircraftItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexaircraftItem++;
+								int itemsMax = (activeLineIndexaircraft == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexaircraftItem == itemsMax)
+									activeLineIndexaircraftItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexaircraft == (lineCount - 1))
+			if (activeLineIndexaircraftItem >= itemCountLastLine)
+				activeLineIndexaircraftItem = 0;
+	}
+	return false;
+}
+
+
+int activeLineIndexhelicopter = 0;
+int activeLineIndexhelicopterIteem = 0;
+
+LPCSTR helicopter[3][5] = {
+	{"BLIMP","BLIMP2","SAVAGE","SWIFT","SWIFT2"},
+	{"SKYLIFT","FROGGER","FROGGER2","BUZZARD2","BUZZARD"},
+	{"ANNIHILATOR","CARGOBOB","CARGOBOB2","CARGOBOB3","MAVERICK"}
+};
+
+bool process_helicopter_menu() {
+	DWORD waitTime = 150;
+	const int lineCount = 3;
+	const int itemCount = 5;
+	const int itemCountLastLine = 5;
+	const float lineWidth = 250.0;
+	while (true)
+	{
+		// timed menu draw, used for pause after active line switch
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			// draw menu
+			draw_menu_line(u8"直升机", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexhelicopter + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(helicopter[activeLineIndexhelicopter][i]))
+					draw_menu_line(helicopter[activeLineIndexhelicopter][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(helicopter[activeLineIndexhelicopter][activeLineIndexhelicopterIteem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexhelicopterIteem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 230.0, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = helicopter[activeLineIndexhelicopter][activeLineIndexhelicopterIteem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+
+				if (featureVenaircraft)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexhelicopter++;
+					if (activeLineIndexhelicopter == lineCount)
+						activeLineIndexhelicopter = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexhelicopter == 0)
+							activeLineIndexhelicopter = lineCount;
+						activeLineIndexhelicopter--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexhelicopterIteem == 0)
+								activeLineIndexhelicopterIteem = (activeLineIndexhelicopter == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexhelicopterIteem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexhelicopterIteem++;
+								int itemsMax = (activeLineIndexhelicopter == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexhelicopterIteem == itemsMax)
+									activeLineIndexhelicopterIteem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexhelicopter == (lineCount - 1))
+			if (activeLineIndexhelicopterIteem >= itemCountLastLine)
+				activeLineIndexhelicopterIteem = 0;
+	}
+	return false;
+
+}
+
+int activeLineIndexaship = 0;
+int activeLineIndexashipItem = 0;
+
+LPCSTR aship[3][5] = {
+	{"MARQUIS","SUBMERSIBLE2","DINGHY2","DINGHY3","DINGHY"},
+	{"SPEEDER","JETMAX","PREDATOR","SQUALO","SUNTRAP"},
+	{"TROPIC","SEASHARK","SEASHARK2","SUBMERSIBLE","TORO"}
+};
+
+bool process_aship_menu() {
+	DWORD waitTime = 150;
+	const int lineCount = 3;
+	const int itemCount = 5;
+	const int itemCountLastLine = 5;
+	const float lineWidth = 250.0;
+	while (true)
+	{
+		// timed menu draw, used for pause after active line switch
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			// draw menu
+			draw_menu_line(u8"船舶", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexaship + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(aship[activeLineIndexaship][i]))
+					draw_menu_line(aship[activeLineIndexaship][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(aship[activeLineIndexaship][activeLineIndexashipItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexashipItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 230.0, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = aship[activeLineIndexaship][activeLineIndexashipItem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+
+				if (featureVenaircraft)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexaship++;
+					if (activeLineIndexaship == lineCount)
+						activeLineIndexaship = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexaship == 0)
+							activeLineIndexaship = lineCount;
+						activeLineIndexaship--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexashipItem == 0)
+								activeLineIndexashipItem = (activeLineIndexaship == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexashipItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexashipItem++;
+								int itemsMax = (activeLineIndexaship == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexashipItem == itemsMax)
+									activeLineIndexashipItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexaship == (lineCount - 1))
+			if (activeLineIndexashipItem >= itemCountLastLine)
+				activeLineIndexashipItem = 0;
+	}
+	return false;
+}
+
+
+int activeLineIndexBicycle = 0;
+int activeLineIndexBicycleItem = 0;
+
+LPCSTR Bicycle[1][7] = {
+	{"BMX","CRUISER","TRIBIKE2","FIXTER","SCORCHER","TRIBIKE3","TRIBIKE"}
+};
+
+bool process_Bicycle_menu() {
+	DWORD waitTime = 150;
+	const int lineCount = 1;
+	const int itemCount = 7;
+	const int itemCountLastLine = 7;
+	const float lineWidth = 250.0;
+	while (true)
+	{
+		// timed menu draw, used for pause after active line switch
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			// draw menu
+			draw_menu_line(u8"自行车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexBicycle + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(Bicycle[activeLineIndexBicycle][i]))
+					draw_menu_line(Bicycle[activeLineIndexBicycle][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(Bicycle[activeLineIndexBicycle][activeLineIndexBicycleItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexBicycleItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 285.5, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = Bicycle[activeLineIndexBicycle][activeLineIndexBicycleItem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+
+				if (featureVenaircraft)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexBicycle++;
+					if (activeLineIndexBicycle == lineCount)
+						activeLineIndexBicycle = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexBicycle == 0)
+							activeLineIndexBicycle = lineCount;
+						activeLineIndexBicycle--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexBicycleItem == 0)
+								activeLineIndexBicycleItem = (activeLineIndexBicycle == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexBicycleItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexBicycleItem++;
+								int itemsMax = (activeLineIndexBicycle == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexBicycleItem == itemsMax)
+									activeLineIndexBicycleItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexBicycle == (lineCount - 1))
+			if (activeLineIndexBicycleItem >= itemCountLastLine)
+				activeLineIndexBicycleItem = 0;
+	}
+	return false;
+}
+
+int activeLineIndexSuperCar = 0;
+int activeLineIndexSuperCarItem = 0;
+
+LPCSTR SuperCar[1][10] = {
+	{"VOLTIC","CHEETAH","TURISMOR","ENTITYXF","INFERNUS","VACCA","ZENTORNO","ADDER","BULLET","OSIRIS"}
+};
+
+bool process_SuperCar_menu() {
+	DWORD waitTime = 150;
+	const int lineCount = 1;
+	const int itemCount = 10;
+	const int itemCountLastLine = 10;
+	const float lineWidth = 250.0;
+	while (true)
+	{
+		// timed menu draw, used for pause after active line switch
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			// draw menu
+			draw_menu_line(u8"超级跑车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexSuperCar + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(SuperCar[activeLineIndexSuperCar][i]))
+					draw_menu_line(SuperCar[activeLineIndexSuperCar][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(SuperCar[activeLineIndexSuperCar][activeLineIndexSuperCarItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexSuperCarItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 368.5, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = SuperCar[activeLineIndexSuperCar][activeLineIndexSuperCarItem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+
+				if (featureVenaircraft)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexSuperCar++;
+					if (activeLineIndexSuperCar == lineCount)
+						activeLineIndexSuperCar = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexSuperCar == 0)
+							activeLineIndexSuperCar = lineCount;
+						activeLineIndexSuperCar--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexSuperCarItem == 0)
+								activeLineIndexSuperCarItem = (activeLineIndexSuperCar == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexSuperCarItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexSuperCarItem++;
+								int itemsMax = (activeLineIndexSuperCar == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexSuperCarItem == itemsMax)
+									activeLineIndexSuperCarItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexSuperCar == (lineCount - 1))
+			if (activeLineIndexSuperCarItem >= itemCountLastLine)
+				activeLineIndexSuperCarItem = 0;
+	}
+	return false;
+}
+
+
+int activeLineIndexSportsCar = 0;
+int activeLineIndexSportsCarItem = 0;
+
+LPCSTR SportsCar[4][7] = {
+	{"ALPHA","ELEGY2","FELTZER2","SCHWARZER","SURANO","BANSHEE","BUFFALO"},
+	{"BUFFALO2","BUFFALO3","MASSACRO","MASSACRO2","RAPIDGT","RAPIDGT2","BLISTA2"},
+	{"BLISTA3","JESTER","JESTER2","CARBONIZZARE","KHAMELION","COQUETTE","FUTO"},
+	{"SULTAN","FUROREGT","PENUMBRA","NINEF","NINEF2","COMET2","FUSILADE"}
+};
+
+bool process_SportsCar_menu() {
+	DWORD waitTime = 150;
+	const int lineCount = 1;
+	const int itemCount = 7;
+	const int itemCountLastLine = 7;
+	const float lineWidth = 250.0;
+	while (true)
+	{
+		
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			// draw menu
+			draw_menu_line(u8"跑车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexSportsCar + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(SportsCar[activeLineIndexSportsCar][i]))
+					draw_menu_line(SportsCar[activeLineIndexSportsCar][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(SportsCar[activeLineIndexSportsCar][activeLineIndexSportsCarItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexSportsCarItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 285.5, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = SportsCar[activeLineIndexSportsCar][activeLineIndexSportsCarItem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+
+				if (featureVenaircraft)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexSportsCar++;
+					if (activeLineIndexSportsCar == lineCount)
+						activeLineIndexSportsCar = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexSportsCar == 0)
+							activeLineIndexSportsCar = lineCount;
+						activeLineIndexSportsCar--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexSportsCarItem == 0)
+								activeLineIndexSportsCarItem = (activeLineIndexSportsCar == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexSportsCarItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexSportsCarItem++;
+								int itemsMax = (activeLineIndexSportsCar == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexSportsCarItem == itemsMax)
+									activeLineIndexSportsCarItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexSportsCar == (lineCount - 1))
+			if (activeLineIndexSportsCarItem >= itemCountLastLine)
+				activeLineIndexSportsCarItem = 0;
+	}
+	return false;
+}
+
+
+
+int activeLineIndexJindianSportsCar = 0;
+int activeLineIndexJindianSportsCarItem = 0;
+
+LPCSTR JinDianSportsCar[3][5] = {
+	{"MANANA","BTYPE","TORNADO","TORNADO3","TORNADO2"},
+	{"TORNADO4","JB700","STINGER","STINGERGT","COQUETTE2"},
+	{"PIGALLE","MONROE","ZTYPE","PEYOTE","FELTZER3"}
+};
+
+bool process_jindianSportsCar_menu() {
+	DWORD waitTime = 150;
+	const int lineCount = 3;
+	const int itemCount = 5;
+	const int itemCountLastLine = 5;
+	const float lineWidth = 250.0;
+
+	while (true)
+	{
+
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			// draw menu
+			draw_menu_line(u8"经典跑车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexJindianSportsCar + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(JinDianSportsCar[activeLineIndexJindianSportsCar][i]))
+					draw_menu_line(JinDianSportsCar[activeLineIndexJindianSportsCar][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(JinDianSportsCar[activeLineIndexJindianSportsCar][activeLineIndexJindianSportsCarItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexJindianSportsCarItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 230.0, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = JinDianSportsCar[activeLineIndexJindianSportsCar][activeLineIndexJindianSportsCarItem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+
+				if (featureVenaircraft)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexJindianSportsCar++;
+					if (activeLineIndexJindianSportsCar == lineCount)
+						activeLineIndexJindianSportsCar = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexJindianSportsCar == 0)
+							activeLineIndexJindianSportsCar = lineCount;
+						activeLineIndexJindianSportsCar--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexJindianSportsCarItem == 0)
+								activeLineIndexJindianSportsCarItem = (activeLineIndexJindianSportsCar == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexJindianSportsCarItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexJindianSportsCarItem++;
+								int itemsMax = (activeLineIndexJindianSportsCar == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexJindianSportsCarItem == itemsMax)
+									activeLineIndexJindianSportsCarItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexJindianSportsCar == (lineCount - 1))
+			if (activeLineIndexJindianSportsCarItem >= itemCountLastLine)
+				activeLineIndexJindianSportsCarItem = 0;
+	}
+	return false;
+}
+
+int activeLineIndexCoupe = 0;
+int activeLineIndexCoupeItem = 0;
+
+LPCSTR Coupe[2][5] = {
+	{"EXEMPLAR","COGCABRIO","FELON","FELON2","F620"},
+	{"JACKAL","SENTINEL","SENTINEL2","ZION","ZION2"}
+};
+
+bool process_Coupe_menu() {
+	DWORD waitTime = 150;
+	const int lineCount = 2;
+	const int itemCount = 5;
+	const int itemCountLastLine = 5;
+	const float lineWidth = 250.0;
+
+	while (true)
+	{
+
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			// draw menu
+			draw_menu_line(u8"轿跑车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexCoupe + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(Coupe[activeLineIndexCoupe][i]))
+					draw_menu_line(Coupe[activeLineIndexCoupe][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(Coupe[activeLineIndexCoupe][activeLineIndexCoupeItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexCoupeItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 230.0, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = Coupe[activeLineIndexCoupe][activeLineIndexCoupeItem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+
+				if (featureVenaircraft)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexCoupe++;
+					if (activeLineIndexCoupe == lineCount)
+						activeLineIndexCoupe = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexCoupe == 0)
+							activeLineIndexCoupe = lineCount;
+						activeLineIndexCoupe--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexCoupeItem == 0)
+								activeLineIndexCoupeItem = (activeLineIndexCoupe == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexCoupeItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexCoupeItem++;
+								int itemsMax = (activeLineIndexCoupe == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexCoupeItem == itemsMax)
+									activeLineIndexCoupeItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexCoupe == (lineCount - 1))
+			if (activeLineIndexCoupeItem >= itemCountLastLine)
+				activeLineIndexCoupeItem = 0;
+	}
+	return false;
+}
+
+int activeLineIndexMuscle = 0;
+int activeLineIndexMuscleItem = 0;
+
+LPCSTR Muscle[3][7] = {
+	{"BUCCANEER","GAUNTLET","GAUNTLET2","PICADOR","SABREGT","STALION","STALION2"},
+	{"VIGERO","VOODOO2","DUKES","PHOENIX","RUINER","BLADE","DOMINATOR"},
+	{"DOMINATOR2","HOTKNIFE","SLAMVAN","SLAMVAN2","CHINO","VIRGO","COQUETTE3"}
+};
+
+bool process_Muscle_menu() {
+	DWORD waitTime = 150;
+	const int lineCount = 3;
+	const int itemCount = 7;
+	const int itemCountLastLine = 7;
+	const float lineWidth = 250.0;
+
+	while (true)
+	{
+
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			// draw menu
+			draw_menu_line(u8"肌肉车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexMuscle + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(Muscle[activeLineIndexMuscle][i]))
+					draw_menu_line(Muscle[activeLineIndexMuscle][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(Muscle[activeLineIndexMuscle][activeLineIndexMuscleItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexMuscleItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 285.5, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = Muscle[activeLineIndexMuscle][activeLineIndexMuscleItem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+				
+				if (featureVenaircraft)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexMuscle++;
+					if (activeLineIndexMuscle == lineCount)
+						activeLineIndexMuscle = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexMuscle == 0)
+							activeLineIndexMuscle = lineCount;
+						activeLineIndexMuscle--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexMuscleItem == 0)
+								activeLineIndexMuscleItem = (activeLineIndexMuscle == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexMuscleItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexMuscleItem++;
+								int itemsMax = (activeLineIndexMuscle == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexMuscleItem == itemsMax)
+									activeLineIndexMuscleItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexMuscle == (lineCount - 1))
+			if (activeLineIndexMuscleItem >= itemCountLastLine)
+				activeLineIndexMuscleItem = 0;
+	}
+	return false;
+}
+
+int activeLineIndexCrossCountry = 0;
+int activeLineIndexCrossCountryItem = 0;
+
+LPCSTR CrossCountry[3][7] = {
+	{"DUBSTA3","BIFTA","BFINJECTION","DUNE","DLOADER","DUNE2","BODHI2"},
+	{"KALAHARI","MESA3","MARSHALL","RANCHERXL","RANCHERXL2","REBEL2","REBEL"},
+	{"BLAZER","BLAZER3","BLAZER2","SANDKING2","SANDKING","MONSTER","BRAWLER"}
+};
+
+bool process_CrossCountry_menu() {
+	DWORD waitTime = 150;
+	const int lineCount = 3;
+	const int itemCount = 7;
+	const int itemCountLastLine = 7;
+	const float lineWidth = 250.0;
+
+	while (true)
+	{
+
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			// draw menu
+			draw_menu_line(u8"越野车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexCrossCountry + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(CrossCountry[activeLineIndexCrossCountry][i]))
+					draw_menu_line(CrossCountry[activeLineIndexCrossCountry][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(CrossCountry[activeLineIndexCrossCountry][activeLineIndexCrossCountryItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexCrossCountryItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 285.5, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = CrossCountry[activeLineIndexCrossCountry][activeLineIndexCrossCountryItem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+
+				if (featureVenaircraft)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexCrossCountry++;
+					if (activeLineIndexCrossCountry == lineCount)
+						activeLineIndexCrossCountry = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexCrossCountry == 0)
+							activeLineIndexCrossCountry = lineCount;
+						activeLineIndexCrossCountry--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexCrossCountryItem == 0)
+								activeLineIndexCrossCountryItem = (activeLineIndexCrossCountry == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexCrossCountryItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexCrossCountryItem++;
+								int itemsMax = (activeLineIndexCrossCountry == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexCrossCountryItem == itemsMax)
+									activeLineIndexCrossCountryItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexCrossCountry == (lineCount - 1))
+			if (activeLineIndexCrossCountryItem >= itemCountLastLine)
+				activeLineIndexCrossCountryItem = 0;
+	}
+	return false;
+}
+
+
+int activeLineIndexSportsSUVS = 0;
+int activeLineIndexSportsSUVSItem = 0;
+
+LPCSTR SportsSUVS[2][10] = {
+	{"CAVALCADE","CAVALCADE2","DUBSTA","DUBSTA2","SERRANO","GRESLEY","MESA","MESA2","SEMINOLE","GRANGER"},
+	{"LANDSTALKER","HABANERO","HUNTLEY","FQ2","BALLER","BALLER2","BJXL","PATRIOT","ROCOTO","RADI"}
+};
+
+bool process_SportsSUVS_Vehicle_menu() {
+	DWORD waitTime = 150;
+	const int lineCount = 2;
+	const int itemCount = 10;
+	const int itemCountLastLine = 10;
+	const float lineWidth = 250.0;
+
+	while (true)
+	{
+
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			// draw menu
+			draw_menu_line(u8"运动休旅车 SUVS", lineWidth, 15.0, 15.0, 25.0, 55.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexSportsSUVS + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(SportsSUVS[activeLineIndexSportsSUVS][i]))
+					draw_menu_line(SportsSUVS[activeLineIndexSportsSUVS][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(SportsSUVS[activeLineIndexSportsSUVS][activeLineIndexSportsSUVSItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexSportsSUVSItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 368.5, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = SportsSUVS[activeLineIndexSportsSUVS][activeLineIndexSportsSUVSItem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+
+				if (featureVenaircraft)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexSportsSUVS++;
+					if (activeLineIndexSportsSUVS == lineCount)
+						activeLineIndexSportsSUVS = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexSportsSUVS == 0)
+							activeLineIndexSportsSUVS = lineCount;
+						activeLineIndexSportsSUVS--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexSportsSUVSItem == 0)
+								activeLineIndexSportsSUVSItem = (activeLineIndexSportsSUVS == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexSportsSUVSItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexSportsSUVSItem++;
+								int itemsMax = (activeLineIndexSportsSUVS == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexSportsSUVSItem == itemsMax)
+									activeLineIndexSportsSUVSItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexSportsSUVS == (lineCount - 1))
+			if (activeLineIndexSportsSUVSItem >= itemCountLastLine)
+				activeLineIndexSportsSUVSItem = 0;
+	}
+	return false;
+}
+
+int activeLineIndexCar = 0;
+int activeLineIndexCarItem = 0;
+
+LPCSTR CarVehicle[5][5] = {
+	{"EMPEROR","EMPEROR2","EMPEROR3","PRIMO","STRETCH"},
+	{"WASHINGTON","GLENDALE","SCHAFTER2","ROMERO","FUGITIVE"},
+	{"SURGE","ASEA","ASEA2","PREMIER","REGINA"},
+	{"SUPERD","ASTEROPE","INTRUDER","TAILGATER","ORACLE"},
+	{"ORACLE2","STANIER","TAXI","INGOT","WARRENER"}
+};
+
+bool process_Car_menu() {
+
+	DWORD waitTime = 150;
+	const int lineCount = 5;
+	const int itemCount = 5;
+	const int itemCountLastLine = 5;
+	const float lineWidth = 250.0;
+
+	while (true)
+	{
+
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			// draw menu
+			draw_menu_line(u8"轿车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexCar + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(CarVehicle[activeLineIndexCar][i]))
+					draw_menu_line(CarVehicle[activeLineIndexCar][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(CarVehicle[activeLineIndexCar][activeLineIndexCarItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexCarItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 230.0, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = CarVehicle[activeLineIndexCar][activeLineIndexCarItem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+
+				if (featureVenaircraft)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexCar++;
+					if (activeLineIndexCar == lineCount)
+						activeLineIndexCar = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexCar == 0)
+							activeLineIndexCar = lineCount;
+						activeLineIndexCar--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexCarItem == 0)
+								activeLineIndexCarItem = (activeLineIndexCar == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexCarItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexCarItem++;
+								int itemsMax = (activeLineIndexCar == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexCarItem == itemsMax)
+									activeLineIndexCarItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexCar == (lineCount - 1))
+			if (activeLineIndexCarItem >= itemCountLastLine)
+				activeLineIndexCarItem = 0;
+	}
+	return false;
+}
+
+
+int activeLineIndexSmallCar = 0;
+int activeLineIndexSmallCarItem = 0;
+
+LPCSTR SmallCar[1][7] = {
+	{"PANTO","PRAIRIE","RHAPSODY","BLISTA","DILETTANTE","DILETTANTE2","ISSI2"}
+};
+
+bool process_Small_Car_menu() {
+	DWORD waitTime = 150;
+	const int lineCount = 1;
+	const int itemCount = 7;
+	const int itemCountLastLine = 7;
+	const float lineWidth = 250.0;
+
+	while (true)
+	{
+
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			// draw menu
+			draw_menu_line(u8"小型汽车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexSmallCar + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(SmallCar[activeLineIndexSmallCar][i]))
+					draw_menu_line(SmallCar[activeLineIndexSmallCar][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(SmallCar[activeLineIndexSmallCar][activeLineIndexSmallCarItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexSmallCarItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 285.5, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = SmallCar[activeLineIndexSmallCar][activeLineIndexSmallCarItem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+
+				if (featureVenaircraft)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexSmallCar++;
+					if (activeLineIndexSmallCar == lineCount)
+						activeLineIndexSmallCar = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexSmallCar == 0)
+							activeLineIndexSmallCar = lineCount;
+						activeLineIndexSmallCar--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexSmallCarItem == 0)
+								activeLineIndexSmallCarItem = (activeLineIndexSmallCar == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexSmallCarItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexSmallCarItem++;
+								int itemsMax = (activeLineIndexSmallCar == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexSmallCarItem == itemsMax)
+									activeLineIndexSmallCarItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexSmallCar == (lineCount - 1))
+			if (activeLineIndexSmallCarItem >= itemCountLastLine)
+				activeLineIndexSmallCarItem = 0;
+	}
+	return false;
+}
+
+int activeLineIndexPickUp = 0;
+int activeLineIndexPickUpItem = 0;
+
+LPCSTR PickUp[1][8] = {
+	{"BISON","BISON3","BISON2","RATLOADER2","RATLOADER","BOBCATXL","SADLER","SADLER2"}
+};
+
+bool process_PickUp_menu() {
+	DWORD waitTime = 150;
+	const int lineCount = 1;
+	const int itemCount = 8;
+	const int itemCountLastLine = 8;
+	const float lineWidth = 250.0;
+
+	while (true)
+	{
+
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			// draw menu
+			draw_menu_line(u8"皮卡 PICKUPS", lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexPickUp + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(PickUp[activeLineIndexPickUp][i]))
+					draw_menu_line(PickUp[activeLineIndexPickUp][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(PickUp[activeLineIndexPickUp][activeLineIndexPickUpItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexPickUpItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 313.5, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = PickUp[activeLineIndexPickUp][activeLineIndexPickUpItem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+
+				if (featureVenaircraft)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexPickUp++;
+					if (activeLineIndexPickUp == lineCount)
+						activeLineIndexPickUp = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexPickUp == 0)
+							activeLineIndexPickUp = lineCount;
+						activeLineIndexPickUp--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexPickUpItem == 0)
+								activeLineIndexPickUpItem = (activeLineIndexPickUp == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexPickUpItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexPickUpItem++;
+								int itemsMax = (activeLineIndexPickUp == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexPickUpItem == itemsMax)
+									activeLineIndexPickUpItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexPickUp == (lineCount - 1))
+			if (activeLineIndexPickUpItem >= itemCountLastLine)
+				activeLineIndexPickUpItem = 0;
+	}
+	return false;
+}
+
+int activeLineIndexBoxCar = 0;
+int activeLineIndexBoxCarItem = 0;
+
+LPCSTR BoxCar[3][7] = {
+	{"SURFER","SURFER2","PARADISE","RUMPO2","RUMPO","YOUGA","CAMPER"},
+	{"PONY","PONY2","TACO","BURRITO3","BURRITO2","BURRITO4","GBURRITO2"},
+	{"BURRITO","BURRITO5","GBURRITO","MINIVAN","SPEEDO","SPEEDO2","JOURNEY"}
+};
+
+bool process_Box_Car_menu() {
+	DWORD waitTime = 150;
+	const int lineCount = 3;
+	const int itemCount = 7;
+	const int itemCountLastLine = 7;
+	const float lineWidth = 250.0;
+
+	while (true)
+	{
+
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			// draw menu
+			draw_menu_line(u8"厢型车 VANS", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexBoxCar + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(BoxCar[activeLineIndexBoxCar][i]))
+					draw_menu_line(BoxCar[activeLineIndexBoxCar][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(BoxCar[activeLineIndexBoxCar][activeLineIndexBoxCarItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexBoxCarItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 285.5, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = BoxCar[activeLineIndexBoxCar][activeLineIndexBoxCarItem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+
+				if (featureVenaircraft)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexBoxCar++;
+					if (activeLineIndexBoxCar == lineCount)
+						activeLineIndexBoxCar = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexBoxCar == 0)
+							activeLineIndexBoxCar = lineCount;
+						activeLineIndexBoxCar--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexBoxCarItem == 0)
+								activeLineIndexBoxCarItem = (activeLineIndexBoxCar == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexBoxCarItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexBoxCarItem++;
+								int itemsMax = (activeLineIndexBoxCar == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexBoxCarItem == itemsMax)
+									activeLineIndexBoxCarItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexBoxCar == (lineCount - 1))
+			if (activeLineIndexBoxCarItem >= itemCountLastLine)
+				activeLineIndexBoxCarItem = 0;
+	}
+	return false;
+}
+
+
+int activeLineIndexCommercial = 0;
+int activeLineIndexCommercialItem = 0;
+
+LPCSTR Commercial[3][9] = {
+	{"BOXVILLE2","BOXVILLE3","BOXVILLE4","BOXVILLE","STOCKADE","STOCKADE3","TIPTRUCK","TIPTRUCK2","CUTTER"},
+	{"HANDLER","DOCKTUG","DUMP","BIFF","HAULER","PHANTOM","RUBBLE","MULE","MULE2"},
+	{"MULE3","MIXER","MIXER2","FLATBED","PACKER","POUNDER","BENSON","SCRAP","TOWTRUCK"}
+};
+
+bool process_Commercial_menu() {
+	DWORD waitTime = 150;
+	const int lineCount = 3;
+	const int itemCount = 9;
+	const int itemCountLastLine = 9;
+	const float lineWidth = 250.0;
+
+	while (true)
+	{
+
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			// draw menu
+			draw_menu_line(u8"商用、工业车", lineWidth, 15.0, 15.0, 25.0, 80.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexCommercial + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(Commercial[activeLineIndexCommercial][i]))
+					draw_menu_line(Commercial[activeLineIndexCommercial][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(Commercial[activeLineIndexCommercial][activeLineIndexCommercialItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexCommercialItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 340.5, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = Commercial[activeLineIndexCommercial][activeLineIndexCommercialItem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+
+				if (featureVenaircraft)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexCommercial++;
+					if (activeLineIndexCommercial == lineCount)
+						activeLineIndexCommercial = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexCommercial == 0)
+							activeLineIndexCommercial = lineCount;
+						activeLineIndexCommercial--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexCommercialItem == 0)
+								activeLineIndexCommercialItem = (activeLineIndexCommercial == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexCommercialItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexCommercialItem++;
+								int itemsMax = (activeLineIndexCommercial == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexCommercialItem == itemsMax)
+									activeLineIndexCommercialItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexCommercial == (lineCount - 1))
+			if (activeLineIndexCommercialItem >= itemCountLastLine)
+				activeLineIndexCommercialItem = 0;
+	}
+	return false;
+}
+
+
+int activeLineIndexServiceXClass = 0;
+int activeLineIndexServiceXClassItem = 0;
+
+LPCSTR ServiceXClass[3][7] = {
+	{"AIRTUG","AIRBUS","BUS","RENTALBUS","TOURBUS","CABLECAR","COACH"},
+	{"BULLDOZER","FORKLIFT","TRASH2","TRASH","CADDY2","CADDY","RIPLEY"},
+	{"TRACTOR2","TRACTOR3","MOWER","TRACTOR","UTILLITRUCK3","UTILLITRUCK2","UTILLITRUCK"}
+};
+
+bool process_ServiceXClass_menu() {
+	DWORD waitTime = 150;
+	const int lineCount = 3;
+	const int itemCount = 7;
+	const int itemCountLastLine = 7;
+	const float lineWidth = 250.0;
+
+	while (true)
+	{
+
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			// draw menu
+			draw_menu_line(u8"服务类", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexServiceXClass + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(ServiceXClass[activeLineIndexServiceXClass][i]))
+					draw_menu_line(ServiceXClass[activeLineIndexServiceXClass][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(ServiceXClass[activeLineIndexServiceXClass][activeLineIndexServiceXClassItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexServiceXClassItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 285.5, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = ServiceXClass[activeLineIndexServiceXClass][activeLineIndexServiceXClassItem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+
+				if (featureVenaircraft)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexServiceXClass++;
+					if (activeLineIndexServiceXClass == lineCount)
+						activeLineIndexServiceXClass = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexServiceXClass == 0)
+							activeLineIndexServiceXClass = lineCount;
+						activeLineIndexServiceXClass--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexServiceXClassItem == 0)
+								activeLineIndexServiceXClassItem = (activeLineIndexServiceXClass == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexServiceXClassItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexServiceXClassItem++;
+								int itemsMax = (activeLineIndexServiceXClass == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexServiceXClassItem == itemsMax)
+									activeLineIndexServiceXClassItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexServiceXClass == (lineCount - 1))
+			if (activeLineIndexServiceXClassItem >= itemCountLastLine)
+				activeLineIndexServiceXClassItem = 0;
+	}
+	return false;
+}
+
+int activeLineIndexTrailer = 0;
+int activeLineIndexTrailderItem = 0;
+
+LPCSTR Trailer[2][12] = {
+	{"ARMYTRAILER","ARMYTRAILER2","ARMYTANKER","BOATTRAILER","TR3","TR4","TR2","TRAILERS2","TRAILERS3","DOCKTRAILER","TVTRAILER","FREIGHTTRAILER"},
+	{"TRFLAT","GRAINTRAILER","BALETRAILER","TRAILERLOGS","PROPTRAILER","TANKER2","TANKER","TRAILERS","RAKETRAILER","TRAILERSMALL","trailerlarge","trailers4"}
+};
+
+bool process_Trailer_menu() {
+	DWORD waitTime = 150;
+	const int lineCount = 2;
+	const int itemCount = 12;
+	const int itemCountLastLine = 12;
+	const float lineWidth = 250.0;
+
+	while (true)
+	{
+
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			// draw menu
+			draw_menu_line(u8"拖车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexTrailer + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(Trailer[activeLineIndexTrailer][i]))
+					draw_menu_line(Trailer[activeLineIndexTrailer][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(Trailer[activeLineIndexTrailer][activeLineIndexTrailderItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexTrailderItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 422.5, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = Trailer[activeLineIndexTrailer][activeLineIndexTrailderItem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+
+				if (featureVenaircraft)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexTrailer++;
+					if (activeLineIndexTrailer == lineCount)
+						activeLineIndexTrailer = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexTrailer == 0)
+							activeLineIndexTrailer = lineCount;
+						activeLineIndexTrailer--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexTrailderItem == 0)
+								activeLineIndexTrailderItem = (activeLineIndexTrailer == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexTrailderItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexTrailderItem++;
+								int itemsMax = (activeLineIndexTrailer == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexTrailderItem == itemsMax)
+									activeLineIndexTrailderItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexTrailer == (lineCount - 1))
+			if (activeLineIndexTrailderItem >= itemCountLastLine)
+				activeLineIndexTrailderItem = 0;
+	}
+	return false;
+}
+
+int activeLineIndexEmergencyVehicle = 0;
+int activeLineIndexEmergencyVehicleItem = 0;
+
+
+LPCSTR EmergencyVehicle[2][11] = {
+	{"POLICEOLD2","AMBULANCE","BARRACKS","BARRACKS2","FBI","RIOT","CRUSADER","FBI2","LGUARD","PRANGER","POLICEOLD1"},
+	{"POLICET","SHERIFF2","FIRETRUK","PBUS","RHINO","POLICE2","POLICE","POLICE3","SHERIFF","POLICE4","POLICEB"}
+};
+
+bool process_Emergency_Vehicle_menu() {
+	DWORD waitTime = 150;
+	const int lineCount = 2;
+	const int itemCount = 11;
+	const int itemCountLastLine = 11;
+	const float lineWidth = 250.0;
+
+	while (true)
+	{
+
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			// draw menu
+			draw_menu_line(u8"紧急车辆", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexEmergencyVehicle + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(EmergencyVehicle[activeLineIndexEmergencyVehicle][i]))
+					draw_menu_line(EmergencyVehicle[activeLineIndexEmergencyVehicle][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(EmergencyVehicle[activeLineIndexEmergencyVehicle][activeLineIndexEmergencyVehicleItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexEmergencyVehicleItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 395.5, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = EmergencyVehicle[activeLineIndexEmergencyVehicle][activeLineIndexEmergencyVehicleItem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+
+				if (featureVenaircraft)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexEmergencyVehicle++;
+					if (activeLineIndexEmergencyVehicle == lineCount)
+						activeLineIndexEmergencyVehicle = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexEmergencyVehicle == 0)
+							activeLineIndexEmergencyVehicle = lineCount;
+						activeLineIndexEmergencyVehicle--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexEmergencyVehicleItem == 0)
+								activeLineIndexEmergencyVehicleItem = (activeLineIndexEmergencyVehicle == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexEmergencyVehicleItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexEmergencyVehicleItem++;
+								int itemsMax = (activeLineIndexEmergencyVehicle == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexEmergencyVehicleItem == itemsMax)
+									activeLineIndexEmergencyVehicleItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexEmergencyVehicle == (lineCount - 1))
+			if (activeLineIndexEmergencyVehicleItem >= itemCountLastLine)
+				activeLineIndexEmergencyVehicleItem = 0;
+	}
+	return false;
+}
+
+
+
+
+int activeLineIndexTrain = 0;
+
+void process_train_menu() {
+	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
+	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"火车菜单已打开");
+	// 提示声音
+	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
+
+	UI::_DRAW_NOTIFICATION(0, 0);
+
+
+	const float lineWidth = 250.0;
+	const int lineCount = 7;
+
+	std::string caption = u8"火车";
+	static struct {
+		LPCSTR		text;
+		bool* pState;
+		bool* pUpdated;
+	} lines[lineCount] = {
+			{u8"火车集装箱 1					  ", NULL, NULL},
+			{u8"火车集装箱 2					  ", NULL, NULL},
+			{u8"火车车托						  ", NULL, NULL},
+			{u8"火车车头						  ", NULL, NULL},
+			{u8"火车货柜						  ", NULL, NULL},
+			{u8"电车 (一半)					  ", NULL, NULL},
+			{u8"油罐							  ", NULL, NULL}
+
+	};
+
+	DWORD waitTime = 150;
+	while (true)
+	{
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME					   %d / %d", activeLineIndexTrain + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < lineCount; i++)
+				if (i != activeLineIndexTrain)
+					draw_menu_line(line_as_str(lines[i].text, lines[i].pState),
+						lineWidth, 5.0, 91. + i * 27.5, 25.0, 9.0, false, false);
+			draw_menu_line(line_as_str(lines[activeLineIndexTrain].text, lines[activeLineIndexTrain].pState),
+				lineWidth, 5.0, 91. + activeLineIndexTrain * 27.5, 25.0, 9.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 285.5, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+		bool bSelect, bBack, bUp, bDown;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, NULL, NULL);
+		if (bSelect)
+		{
+			menu_beep();
+			switch (activeLineIndexTrain)
+			{
+			case 0:; break;
+			case 1:; break;
+			case 2:; break;
+			case 3:; break;
+			case 4:; break;
+			case 5:; break;
+			case 6:; break;
+
+			}
+			waitTime = 200;
+		}
+		else
+			if (bBack || trainer_switch_pressed())
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bUp)
+				{
+					menu_beep();
+					if (activeLineIndexTrain == 0)
+						activeLineIndexTrain = lineCount;
+					activeLineIndexTrain--;
+					waitTime = 150;
+				}
+				else
+					if (bDown)
+					{
+						menu_beep();
+						activeLineIndexTrain++;
+						if (activeLineIndexTrain == lineCount)
+							activeLineIndexTrain = 0;
+						waitTime = 150;
+					}
+	}
+}
+
+
+int activeLineIndexStandardcar = 0;
+
+void process_Standardcar_menu() {
+	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
+	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"经典汽车菜单已打开");
+	// 提示声音
+	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
+
+	UI::_DRAW_NOTIFICATION(0, 0);
+
+	const float lineWidth = 250.0;
+	const int lineCount = 15;
+
+	std::string caption = u8"经典汽车";
+	static struct {
+		LPCSTR		text;
+		bool* pState;
+		bool* pUpdated;
+	} lines[lineCount] = {
+			{u8"超级跑车						  >", NULL, NULL},
+			{u8"跑车							  >", NULL, NULL},
+			{u8"经典跑车						  >", NULL, NULL},
+			{u8"轿跑车						  >", NULL, NULL},
+			{u8"肌肉车						  >", NULL, NULL},
+			{u8"越野车						  >", NULL, NULL},
+			{u8"运动休旅车 SUVS				  >", NULL, NULL},
+			{u8"轿车							  >", NULL, NULL},
+			{u8"小型汽车						  >", NULL, NULL},
+			{u8"皮卡 PICKUPS					  >", NULL, NULL},
+			{u8"厢型车 VANS					  >", NULL, NULL},
+			{u8"商用、工业车					  >", NULL, NULL},
+			{u8"服务类						  >", NULL, NULL},
+			{u8"拖车							  >", NULL, NULL},
+			{u8"紧急车辆						  >", NULL, NULL}
+	};
+	DWORD waitTime = 150;
+	while (true)
+	{
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME					   %d / %d", activeLineIndexStandardcar + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < lineCount; i++)
+				if (i != activeLineIndexStandardcar)
+					draw_menu_line(line_as_str(lines[i].text, lines[i].pState),
+						lineWidth, 5.0, 91. + i * 27.5, 25.0, 9.0, false, false);
+			draw_menu_line(line_as_str(lines[activeLineIndexStandardcar].text, lines[activeLineIndexStandardcar].pState),
+				lineWidth, 5.0, 91. + activeLineIndexStandardcar * 27.5, 25.0, 9.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 505.5, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+		bool bSelect, bBack, bUp, bDown;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, NULL, NULL);
+		if (bSelect)
+		{
+			menu_beep();
+			switch (activeLineIndexStandardcar)
+			{
+			case 0:process_SuperCar_menu(); break;
+			case 1:process_SportsCar_menu(); break;
+			case 2:process_jindianSportsCar_menu(); break;
+			case 3:process_Coupe_menu(); break;
+			case 4:process_Muscle_menu(); break;
+			case 5:process_CrossCountry_menu(); break;
+			case 6:process_SportsSUVS_Vehicle_menu(); break;
+			case 7:process_Car_menu(); break;
+			case 8:process_Small_Car_menu(); break;
+			case 9:process_PickUp_menu(); break;
+			case 10:process_Box_Car_menu(); break;
+			case 11:process_Commercial_menu(); break;
+			case 12:process_ServiceXClass_menu(); break;
+			case 13:process_Trailer_menu(); break;
+			case 14:process_Emergency_Vehicle_menu(); break;
+			}
+			waitTime = 200;
+		}
+		else
+			if (bBack || trainer_switch_pressed())
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bUp)
+				{
+					menu_beep();
+					if (activeLineIndexStandardcar == 0)
+						activeLineIndexStandardcar = lineCount;
+					activeLineIndexStandardcar--;
+					waitTime = 150;
+				}
+				else
+					if (bDown)
+					{
+						menu_beep();
+						activeLineIndexStandardcar++;
+						if (activeLineIndexStandardcar == lineCount)
+							activeLineIndexStandardcar = 0;
+						waitTime = 150;
+					}
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 int activeLineIndexPlayer = 0;
 
 void process_player_menu()
@@ -1044,14 +3898,14 @@ void process_player_menu()
 		{u8"加现金", NULL, NULL},
 		{u8"通缉", NULL, NULL},
 		{u8"想打倒", NULL, NULL},
-		{u8"从没想过", &featurePlayerNeverWanted, NULL},
-		{u8"无敌的", &featurePlayerInvincible, &featurePlayerInvincibleUpdated},
-		{u8"警方不予理睬", &featurePlayerIgnored, &featurePlayerIgnoredUpdated},
-		{u8"不发光能力", &featurePlayerUnlimitedAbility, NULL},
-		{u8"无声的", &featurePlayerNoNoise, &featurePlayerNoNoiseUpdated},
-		{u8"快速游泳", &featurePlayerFastSwim, &featurePlayerFastSwimUpdated},
-		{u8"快跑", &featurePlayerFastRun, &featurePlayerFastRunUpdated},
-		{u8"超级跳跃", &featurePlayerSuperJump, NULL}
+		{u8"从没想过					   ", &featurePlayerNeverWanted, NULL},
+		{u8"无敌的				           ", &featurePlayerInvincible, &featurePlayerInvincibleUpdated},
+		{u8"警方不予理睬				   ", &featurePlayerIgnored, &featurePlayerIgnoredUpdated},
+		{u8"不发光能力				   ", &featurePlayerUnlimitedAbility, NULL},
+		{u8"无声的				           ", &featurePlayerNoNoise, &featurePlayerNoNoiseUpdated},
+		{u8"快速游泳					   ", &featurePlayerFastSwim, &featurePlayerFastSwimUpdated},
+		{u8"快跑					           ", &featurePlayerFastRun, &featurePlayerFastRunUpdated},
+		{u8"超级跳跃					   ", &featurePlayerSuperJump, NULL}
 	};
 
 	DWORD waitTime = 150;
@@ -1074,7 +3928,9 @@ void process_player_menu()
 						lineWidth, 5.0, 91. + i * 27.5, 25.0, 9.0, false, false);
 			draw_menu_line(line_as_str(lines[activeLineIndexPlayer].text, lines[activeLineIndexPlayer].pState),
 				lineWidth , 5.0, 91. + activeLineIndexPlayer * 27.5, 25.0, 9.0, true, false);
-
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 505.5, 25.0, 5.0, false, false);
+			Bottom = false;
 			update_features();
 			WAIT(0);
 		} while (GetTickCount() < maxTickCount);
@@ -1211,28 +4067,23 @@ void process_weapon_menu()
 		bool* pState;
 		bool* pUpdated;
 	} lines[lineCount] = {
-		{u8"全副武装",	NULL,						  NULL},
-		{u8"无需重新加载",		&featureWeaponNoReload,		  NULL},
-		{u8"发射弹药",		&featureWeaponFireAmmo,		  NULL},
-		{u8"爆炸性弹药",  &featureWeaponExplosiveAmmo,  NULL},
-		{u8"爆炸性混战", &featureWeaponExplosiveMelee, NULL},
-		{u8"运载火箭", &featureWeaponVehRockets,	  NULL}
+		{u8"全副武装					    ",	NULL,						  NULL},
+		{u8"无需重新加载				    ",		&featureWeaponNoReload,		  NULL},
+		{u8"发射弹药					    ",		&featureWeaponFireAmmo,		  NULL},
+		{u8"爆炸性弹药				    ",  &featureWeaponExplosiveAmmo,  NULL},
+		{u8"爆炸性近战				    ", &featureWeaponExplosiveMelee, NULL},
+		{u8"车载火箭					    ", &featureWeaponVehRockets,	  NULL}
 	};
 
 	static LPCSTR weaponNames[] = {
-		"WEAPON_KNIFE", "WEAPON_NIGHTSTICK", "WEAPON_HAMMER", "WEAPON_BAT", "WEAPON_GOLFCLUB", "WEAPON_CROWBAR",
-		"WEAPON_PISTOL", "WEAPON_COMBATPISTOL", "WEAPON_APPISTOL", "WEAPON_PISTOL50", "WEAPON_MICROSMG", "WEAPON_SMG",
-		"WEAPON_ASSAULTSMG", "WEAPON_ASSAULTRIFLE", "WEAPON_CARBINERIFLE", "WEAPON_ADVANCEDRIFLE", "WEAPON_MG",
-		"WEAPON_COMBATMG", "WEAPON_PUMPSHOTGUN", "WEAPON_SAWNOFFSHOTGUN", "WEAPON_ASSAULTSHOTGUN", "WEAPON_BULLPUPSHOTGUN",
-		"WEAPON_STUNGUN", "WEAPON_SNIPERRIFLE", "WEAPON_HEAVYSNIPER", "WEAPON_GRENADELAUNCHER", "WEAPON_GRENADELAUNCHER_SMOKE",
-		"WEAPON_RPG", "WEAPON_MINIGUN", "WEAPON_GRENADE", "WEAPON_STICKYBOMB", "WEAPON_SMOKEGRENADE", "WEAPON_BZGAS",
-		"WEAPON_MOLOTOV", "WEAPON_FIREEXTINGUISHER", "WEAPON_PETROLCAN",
-		"WEAPON_SNSPISTOL", "WEAPON_SPECIALCARBINE", "WEAPON_HEAVYPISTOL", "WEAPON_BULLPUPRIFLE", "WEAPON_HOMINGLAUNCHER",
-		"WEAPON_PROXMINE", "WEAPON_SNOWBALL", "WEAPON_VINTAGEPISTOL", "WEAPON_DAGGER", "WEAPON_FIREWORK", "WEAPON_MUSKET",
-		"WEAPON_MARKSMANRIFLE", "WEAPON_HEAVYSHOTGUN", "WEAPON_GUSENBERG", "WEAPON_HATCHET", "WEAPON_RAILGUN",
-		"WEAPON_COMBATPDW", "WEAPON_KNUCKLE", "WEAPON_MARKSMANPISTOL",
-		"WEAPON_FLASHLIGHT", "WEAPON_MACHETE", "WEAPON_MACHINEPISTOL",
-		"WEAPON_SWITCHBLADE", "WEAPON_REVOLVER"
+		"WEAPON_APPISTOL","WEAPON_COMBATPISTOL","WEAPON_PISTOL","WEAPON_BOTTLE","WEAPON_CROWBAR","WEAPON_GOLFCLUB","","WEAPON_BAT","WEAPON_HAMMER","WEAPON_NIGHTSTICK","WEAPON_KNIFE",
+		"WEAPON_PUMPSHOTGUN","WEAPON_COMBATMG","WEAPON_MG","WEAPON_ADVANCEDRIFLE","WEAPON_CARBINERIFLE","WEAPON_ASSAULTRIFLE","WEAPON_ASSAULTSMG","WEAPON_SMG","WEAPON_MICROSMG","WEAPON_REVOLVER","WEAPON_PISTOL50",
+		"WEAPON_STICKYBOMB","WEAPON_GRENADE","WEAPON_MINIGUN","WEAPON_RPG","WEAPON_GRENADELAUNCHER","WEAPON_HEAVYSNIPER","WEAPON_SNIPERRIFLE","WEAPON_STUNGUN","WEAPON_BULLPUPSHOTGUN","WEAPON_ASSAULTSHOTGUN","WEAPON_SAWNOFFSHOTGUN",
+		"WEAPON_HOMINGLAUNCHER","WEAPON_BULLPUPRIFLE","WEAPON_HEAVYPISTOL","WEAPON_SPECIALCARBINE","WEAPON_SNSPISTOL","WEAPON_PETROLCAN","WEAPON_FIREEXTINGUISHER","WEAPON_MOLOTOV","WEAPON_FLARE","WEAPON_FLAREGUN","WEAPON_SMOKEGRENADE",
+		"WEAPON_RAILGUN","WEAPON_HATCHET","WEAPON_GUSENBERG","WEAPON_HEAVYSHOTGUN","WEAPON_MARKSMANRIFLE","WEAPON_MUSKET","WEAPON_FIREWORK","WEAPON_DAGGER","WEAPON_VINTAGEPISTOL","WEAPON_SNOWBALL","WEAPON_PROXMINE",
+		"WEAPON_PISTOL_MK2","WEAPON_AUTOSHOTGUN","WEAPON_BATTLEAXE","WEAPON_COMPACTLAUNCHER","WEAPON_MINISMG","WEAPON_PIPEBOMB","WEAPON_POOLCUE","WEAPON_WRENCH","WEAPON_STINGER","WEAPON_BZGAS","WEAPON_BALL",
+		"WEAPON_PUMPSHOTGUN_MK2","WEAPON_BULLPUPRIFLE_MK2","WEAPON_SPECIALCARBINE_MK2","WEAPON_REVOLVER_MK2","WEAPON_HEAVYSNIPER_MK2","WEAPON_COMBATMG_MK2","WEAPON_MARKSMANRIFLE_MK2","WEAPON_CARBINERIFLE_MK2","WEAPON_ASSAULTRIFLE_MK2","WEAPON_SMG_MK2","WEAPON_SNSPISTOL_MK2"
+	
 	};
 
 	DWORD waitTime = 150;
@@ -1255,6 +4106,10 @@ void process_weapon_menu()
 						lineWidth, 5.0, 91. + i * 27.5, 25.0, 9.0, false, false);
 			draw_menu_line(line_as_str(lines[activeLineIndexWeapon].text, lines[activeLineIndexWeapon].pState),
 				lineWidth , 5.0, 91. + activeLineIndexWeapon * 27.5, 25.0, 9.0, true, false);
+			
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 257.5, 25.0, 5.0, false, false);
+			Bottom = false;
 
 			update_features();
 			WAIT(0);
@@ -1368,6 +4223,7 @@ bool process_carspawn_menu()
 	const int lineCount = 40;
 	const int itemCount = 10;
 	const int itemCountLastLine = 10;
+	const float lineWidth = 250.0;
 	while (true)
 	{
 		// timed menu draw, used for pause after active line switch
@@ -1375,9 +4231,12 @@ bool process_carspawn_menu()
 		do
 		{
 			// draw menu
-			char caption[32];
-			sprintf_s(caption, u8"汽车产卵器   %d / %d", carspawnActiveLineIndex + 1, lineCount);
-			draw_menu_line(caption, 350.0, 15.0, 18.0, 0.0, 5.0, false, true);
+			draw_menu_line(u8"刷出载具", lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", carspawnActiveLineIndex + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
 			for (int i = 0; i < itemCount; i++)
 				if (strlen(vehicleModels[carspawnActiveLineIndex][i]))
 					draw_menu_line(vehicleModels[carspawnActiveLineIndex][i], 100.0, 5.0, 200.0, 100.0 + i * 110.0, 5.0, i == carspawnActiveItemIndex, false, false);
@@ -1470,6 +4329,7 @@ bool process_carspawn_menu()
 	return false;
 }
 
+
 int activeLineIndexVeh = 0;
 
 void process_veh_menu()
@@ -1481,7 +4341,7 @@ void process_veh_menu()
 
 	UI::_DRAW_NOTIFICATION(0, 0);
 	const float lineWidth = 250.0;
-	const int lineCount = 8;
+	const int lineCount = 15;
 
 	std::string caption = u8"交通工具";
 
@@ -1490,14 +4350,21 @@ void process_veh_menu()
 		bool* pState;
 		bool* pUpdated;
 	} lines[lineCount] = {
-		{u8"汽车产卵器",		NULL, NULL},
+		{u8"DLC							  >",		NULL, NULL},
+		{u8"汽车							  >",		NULL, NULL},
+		{u8"火车							  >",		NULL, NULL},
+		{u8"摩托车						  >",		NULL, NULL},
+		{u8"飞机							  >",		NULL, NULL},
+		{u8"直升机						  >",		NULL, NULL},
+		{u8"船舶							  >",		NULL, NULL},
+		{u8"自行车						  >",		NULL, NULL},
 		{u8"随意画",	NULL, NULL},
 		{u8"修理",				NULL, NULL},
-		{u8"安全带",		&featureVehSeatbelt, &featureVehSeatbeltUpdated},
-		{u8"裹上产卵",	&featureVehWrapInSpawned, NULL},
-		{u8"无敌的",		&featureVehInvincible, &featureVehInvincibleUpdated},
-		{u8"坚固的车轮",	&featureVehInvincibleWheels, &featureVehInvincibleWheelsUpdated},
-		{u8"提速",		&featureVehSpeedBoost, NULL}
+		{u8"安全带				           ",		&featureVehSeatbelt, &featureVehSeatbeltUpdated},
+		{u8"刷出就出生载具中			   ",	&featureVehWrapInSpawned, NULL},
+		{u8"无敌载具				           ",		&featureVehInvincible, &featureVehInvincibleUpdated},
+		{u8"防爆车轮					   ",	&featureVehInvincibleWheels, &featureVehInvincibleWheelsUpdated},
+		{u8"提速					           ",		&featureVehSpeedBoost, NULL}
 	};
 
 	DWORD waitTime = 150;
@@ -1510,7 +4377,7 @@ void process_veh_menu()
 			// draw menu
 			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
 			char caption2[32];
-			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexVeh + 1, lineCount);
+			sprintf_s(caption2, u8"HOME					    %d / %d", activeLineIndexVeh + 1, lineCount);
 			about = true;//启用独有约束色
 			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
 			about = false;//关闭独有约束色
@@ -1520,6 +4387,9 @@ void process_veh_menu()
 						lineWidth, 5.0, 91. + i * 27.5, 25.0, 9.0, false, false);
 			draw_menu_line(line_as_str(lines[activeLineIndexVeh].text, lines[activeLineIndexVeh].pState),
 				lineWidth, 5.0, 91. + activeLineIndexVeh * 27.5, 25.0, 9.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 505.5, 25.0, 5.0, false, false);
+			Bottom = false;
 
 			update_features();
 			WAIT(0);
@@ -1537,13 +4407,33 @@ void process_veh_menu()
 			BOOL bPlayerExists = ENTITY::DOES_ENTITY_EXIST(PLAYER::PLAYER_PED_ID());
 			Player player = PLAYER::PLAYER_ID();
 			Ped playerPed = PLAYER::PLAYER_PED_ID();
-
+			//if (process_carspawn_menu()) return
 			switch (activeLineIndexVeh)
 			{
 			case 0:
-				if (process_carspawn_menu()) return;
+				;
 				break;
-			case 1:
+			case 1:process_Standardcar_menu();
+				break;
+			case 2:process_train_menu()
+				;
+				break;
+			case 3:process_motorcycle_menu()
+				  ;
+				break;
+			case 4:process_aircraft_menu()
+				 ;
+				break;
+			case 5:process_helicopter_menu()
+				;
+				break;
+			case 6:process_aship_menu()
+				;
+				break;
+			case 7:process_Bicycle_menu()
+				;
+				break;
+			case 8:
 				if (bPlayerExists)
 				{
 					if (PED::IS_PED_IN_ANY_VEHICLE(playerPed, 0))
@@ -1558,15 +4448,32 @@ void process_veh_menu()
 						set_status_text("player isn't in a vehicle");
 					}
 				}
+				;
 				break;
-			case 2:
+			case 9:
 				if (bPlayerExists)
 					if (PED::IS_PED_IN_ANY_VEHICLE(playerPed, 0))
 						VEHICLE::SET_VEHICLE_FIXED(PED::GET_VEHICLE_PED_IS_USING(playerPed));
 					else
-						set_status_text("player isn't in a vehicle");
+						set_status_text("player isn't in a vehicle")
+				
+				;
 				break;
-				// switchable features
+			case 10:
+				;
+				break;
+			case 11:
+				;
+				break;
+			case 12:
+				;
+				break;
+			case 13:
+				;
+				break;
+			case 14:
+				;
+				break;
 			default:
 				if (lines[activeLineIndexVeh].pState)
 					*lines[activeLineIndexVeh].pState = !(*lines[activeLineIndexVeh].pState);
@@ -1623,11 +4530,11 @@ void process_world_menu()
 		bool* pState;
 		bool* pUpdated;
 	} lines[lineCount] = {
-		{u8"月球引力",	&featureWorldMoonGravity,	NULL},
-		{u8"随机警察",		&featureWorldRandomCops,	NULL},
-		{u8"随机列车",	&featureWorldRandomTrains,	NULL},
-		{u8"随机船只",	&featureWorldRandomBoats,	NULL},
-		{u8"垃圾车",	&featureWorldGarbageTrucks,	NULL}
+		{u8"月球引力					  ",	&featureWorldMoonGravity,	NULL},
+		{u8"随机警察					  ",		&featureWorldRandomCops,	NULL},
+		{u8"随机列车					  ",	&featureWorldRandomTrains,	NULL},
+		{u8"随机船只					  ",	&featureWorldRandomBoats,	NULL},
+		{u8"垃圾车				         ",	&featureWorldGarbageTrucks,	NULL}
 	};
 
 	DWORD waitTime = 150;
@@ -1638,7 +4545,7 @@ void process_world_menu()
 		do
 		{
 			// draw menu
-			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexWorld + 1, lineCount);
 			about = true;//启用独有约束色
@@ -1650,7 +4557,9 @@ void process_world_menu()
 						lineWidth, 5.0, 91. + i * 27.5, 25.0, 9.0, false, false);
 			draw_menu_line(line_as_str(lines[activeLineIndexWorld].text, lines[activeLineIndexWorld].pState),
 				lineWidth , 5.0, 91. + activeLineIndexWorld * 27.5, 25.0, 9.0, true, false);
-
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 230.0, 25.0, 5.0, false, false);
+			Bottom = false;
 			update_features();
 			WAIT(0);
 		} while (GetTickCount() < maxTickCount);
@@ -1737,8 +4646,8 @@ void process_time_menu()
 	} lines[lineCount] = {
 		{u8"一小时前",	 NULL,				 NULL},
 		{u8"一小时后",	 NULL,				 NULL},
-		{u8"时钟暂停了",	 &featureTimePaused, &featureTimePausedUpdated},
-		{u8"与系统同步", &featureTimeSynced, NULL}
+		{u8"时钟暂停了				  ",	 &featureTimePaused, &featureTimePausedUpdated},
+		{u8"与系统同步				  ", &featureTimeSynced, NULL}
 	};
 
 	DWORD waitTime = 150;
@@ -1749,7 +4658,7 @@ void process_time_menu()
 		do
 		{
 			// draw menu
-			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexTime + 1, lineCount);
 			about = true;//启用独有约束色
@@ -1761,7 +4670,9 @@ void process_time_menu()
 						lineWidth, 5.0, 91. + i * 27.5, 25.0, 9.0, false, false);
 			draw_menu_line(line_as_str(lines[activeLineIndexTime].text, lines[activeLineIndexTime].pState),
 				lineWidth , 5.0, 91. + activeLineIndexTime * 27.5, 25.0, 9.0, true, false);
-
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 202.5, 25.0, 5.0, false, false);
+			Bottom = false;
 			update_features();
 			WAIT(0);
 		} while (GetTickCount() < maxTickCount);
@@ -1828,6 +4739,13 @@ int activeLineIndexWeather = 0;
 
 void process_weather_menu()
 {
+	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
+	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"天气选项已打开");
+	// 提示声音
+	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
+
+	UI::_DRAW_NOTIFICATION(0, 0);
+
 	const float lineWidth = 250.0;
 	const int lineCount = 16;
 
@@ -1838,8 +4756,8 @@ void process_weather_menu()
 		bool* pState;
 		bool* pUpdated;
 	} lines[lineCount] = {
-		{u8"风",	 	 &featureWeatherWind,	NULL},
-		{u8"设定持续时间",  &featureWeatherPers,	NULL},
+		{u8"风					 ",	&featureWeatherWind,	NULL},
+		{u8"设定持续时间				  ",  &featureWeatherPers,	NULL},
 		{u8"阳光灿烂",	 NULL,					NULL},
 		{u8"清楚的",		 NULL,					NULL},
 		{u8"云",		 NULL,					NULL},
@@ -1861,20 +4779,15 @@ void process_weather_menu()
 	while (true)
 	{
 
-		UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
-		UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"天气选项已打开");
-		// 提示声音
-		PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
-
-		UI::_DRAW_NOTIFICATION(0, 0);
+		
 		// timed menu draw, used for pause after active line switch
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
 			// draw menu
-			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
-			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexWeather + 1, lineCount);
+			sprintf_s(caption2, u8"HOME					   %d / %d", activeLineIndexWeather + 1, lineCount);
 			about = true;//启用独有约束色
 			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
 			about = false;//关闭独有约束色
@@ -1884,7 +4797,9 @@ void process_weather_menu()
 						lineWidth, 5.0, 91. + i * 27.5, 25.0, 9.0, false, false);
 			draw_menu_line(line_as_str(lines[activeLineIndexWeather].text, lines[activeLineIndexWeather].pState),
 				lineWidth, 5.0, 91. + activeLineIndexWeather * 27.5, 25.0, 9.0, true, false);
-
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 533.0, 25.0, 5.0, false, false);
+			Bottom = false;
 			update_features();
 			WAIT(0);
 		} while (GetTickCount() < maxTickCount);
@@ -1981,7 +4896,7 @@ void process_misc_menu()
 		bool* pUpdated;
 	} lines[lineCount] = {
 		{u8"下一个广播轨道",	NULL,					NULL},
-		{u8"隐藏抬头显示器",			&featureMiscHideHud,	NULL}
+		{u8"隐藏抬头显示器			  ",			&featureMiscHideHud,	NULL}
 	};
 
 
@@ -1993,7 +4908,7 @@ void process_misc_menu()
 		do
 		{
 			// draw menu
-			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexMisc + 1, lineCount);
 			about = true;//启用独有约束色
@@ -2005,7 +4920,9 @@ void process_misc_menu()
 						lineWidth, 5.0, 91. + i * 27.5, 25.0, 9.0, false, false);
 			draw_menu_line(line_as_str(lines[activeLineIndexMisc].text, lines[activeLineIndexMisc].pState),
 				lineWidth, 5.0, 91. + activeLineIndexMisc * 27.5, 25.0, 9.0, true, false);
-
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 147.5, 25.0, 5.0, false, false);
+			Bottom = false;
 			update_features();
 			WAIT(0);
 		} while (GetTickCount() < maxTickCount);
@@ -2080,16 +4997,16 @@ void process_model_menu() {
 		bool* pState;
 		bool* pUpdated;
 	} lines[lineCount] = {
-		{u8"家具",	NULL,       NULL},
-		{u8"人物",		NULL,	NULL},
-		{u8"道路",	NULL,       NULL},
-		{u8"车辆",		NULL,	NULL},
-		{u8"其他1",	NULL,       NULL},
-		{u8"其他2",		NULL,	NULL},
-		{u8"其他3",	NULL,       NULL},
-		{u8"其他4",		NULL,	NULL},
-		{u8"其他5",	NULL,       NULL},
-		{u8"其他6",		NULL,	NULL}
+		{u8"家具							  >",	NULL,       NULL},
+		{u8"人物							  >",		NULL,	NULL},
+		{u8"道路							  >",	NULL,       NULL},
+		{u8"车辆							  >",		NULL,	NULL},
+		{u8"其他1						  >",	NULL,       NULL},
+		{u8"其他2						  >",		NULL,	NULL},
+		{u8"其他3						  >",	NULL,       NULL},
+		{u8"其他4						  >",		NULL,	NULL},
+		{u8"其他5						  >",	NULL,       NULL},
+		{u8"其他6						  >",		NULL,	NULL}
 		
 	};
 	DWORD waitTime = 150;
@@ -2098,9 +5015,9 @@ void process_model_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
-			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexModel + 1, lineCount);
+			sprintf_s(caption2, u8"HOME					   %d / %d", activeLineIndexModel + 1, lineCount);
 			about = true;//启用独有约束色
 			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
 			about = false;//关闭独有约束色
@@ -2110,7 +5027,9 @@ void process_model_menu() {
 						lineWidth, 5.0, 91. + i * 27.5, 25.0, 9.0, false, false);
 			draw_menu_line(line_as_str(lines[activeLineIndexModel].text, lines[activeLineIndexModel].pState),
 				lineWidth, 5.0, 91. + activeLineIndexModel * 27.5, 25.0, 9.0, true, false);
-
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 368.5, 25.0, 5.0, false, false);
+			Bottom = false;
 			update_features();
 			WAIT(0);
 
@@ -2177,26 +5096,7 @@ void process_main_menu()
 	//sprintf_s(statusText, u8"");
 	//set_status_text(statusText);
 
-	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
-	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"GTA5 1.58 线下版本 免费使用");
-	// 提示声音
-	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
-
-	UI::_DRAW_NOTIFICATION(0, 0);
-
-	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
-	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"作者QQ：870993238");
-	// 提示声音
-	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
-
-	UI::_DRAW_NOTIFICATION(0, 0);
-
-	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
-	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"官网：https://q-tai-mu.github.io");
-	// 提示声音
-	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
-
-	UI::_DRAW_NOTIFICATION(0, 0);
+	
 	
 	const float lineWidth = 250.0;
 	const int lineCount = 9;
@@ -2363,6 +5263,8 @@ void reset_globals()
 		featureVehSeatbeltUpdated =
 		featureVehSpeedBoost =
 		featureVehWrapInSpawned =
+		featureVehmotorcycle = 
+		featureVenaircraft =
 		featureWorldMoonGravity =
 		featureTimePaused =
 		featureTimePausedUpdated =
@@ -2383,7 +5285,26 @@ void reset_globals()
 void main()
 {
 	reset_globals();
+	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
+	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"GTA5 1.58 线下版本 免费使用");
+	// 提示声音
+	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
 
+	UI::_DRAW_NOTIFICATION(0, 0);
+
+	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
+	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"作者QQ：870993238");
+	// 提示声音
+	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
+
+	UI::_DRAW_NOTIFICATION(0, 0);
+
+	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
+	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"官网：https://q-tai-mu.github.io");
+	// 提示声音
+	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
+
+	UI::_DRAW_NOTIFICATION(0, 0);
 	while (true)
 	{
 		if (trainer_switch_pressed())
@@ -2400,5 +5321,63 @@ void main()
 void ScriptMain()
 {
 	srand(GetTickCount());
-	main();
+	
+	AllocConsole();
+	freopen("CON", "w", stdout);
+	SetConsoleTitleA("NEVERLOSE logger");//控制台标题
+	std::cout << "GTACHEATS started..."<<std::endl;
+	std::cout << " _____ _" << std::endl;
+	std::cout << "|_   _| |__   ___ _ __   ___  ___ _ __ ___  _ __ ___   __ _ _ __   ___ ___" << std::endl;
+	std::cout << "  | | | '_ \ / _ \ '_ \ / _ \/ __| '__/ _ \| '_ ` _ \ / _` | '_ \ / __/ _ \'" << std::endl;
+	std::cout << "  | | | | | |  __/ | | |  __/ (__| | | (_) | | | | | | (_| | | | | (_|  __/" << std::endl;
+	std::cout << "  |_| |_| |_|\___|_| |_|\___|\___|_|  \___/|_| |_| |_|\__,_|_| |_|\___\___|" << std::endl;
+	std::cout << "[GTACHEATS] minHook未启动，已切换scriptHookV..." << std::endl;
+	std::cout << "[GTACHEATS] 身份校验未启动，已切换单机模式..." << std::endl;
+	std::cout << "[GTACHEATS] UI汉化成功..." << std::endl;
+	std::cout << "[GTACHEATS] 菜单布局读取，布局已左上角为基标..." << std::endl;
+	std::cout << "[GTACHEATS] MIK 武器 添加至武器菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-经典 载具 添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-2015 载具 添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-万圣节狂欢 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-Lowriders 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-沙滩狂欢 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-情人节大** 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-高端商务 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-自以为潮 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-美国独立日 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-飞行学院 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-团队生存 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-圣诞节庆 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-次世代回归 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-抢劫任务 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-做我的情人 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-权贵天下 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-不义之财 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-富贵险中求 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-精彩的表演 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-狂野飙客 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-进出口大亨 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-特殊载具巡回赛 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-军火走私 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-走私大爆走 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-末日抢劫 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-南圣安地列斯超级系列赛 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-不夜城 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-竞技场之战 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-名钻假日赌城 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-名钻赌场豪劫 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-洛圣都夏日特辑 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-佩里科岛抢劫 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-洛圣都改装车夏季 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] DLC-合约 载具 未添加至载具菜单..." << std::endl;
+	std::cout << "[GTACHEATS] 主题配置读取，暗红主题已设置..." << std::endl;
+	std::cout << "[GTACHEATS] 菜单其他设置完成..." << std::endl;
+	std::cout << "[GTACHEATS] 菜单校验完成，进游戏 F4启动..." << std::endl;
+	//std::cin >> input;
+	//if (0 == strcmp(input, "123")) {
+
+
+		main();
+	//}
+	
 }
