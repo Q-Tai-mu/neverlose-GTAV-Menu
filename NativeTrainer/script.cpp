@@ -46,22 +46,22 @@ void draw_menu_line(std::string caption, float lineWidth, float lineHeight, floa
 	if (active)
 	{
 		//选中状态标字体题色
-		text_col[0] = 255;
-		text_col[1] = 255;
-		text_col[2] = 255;
+		text_col[0] = 0;
+		text_col[1] = 0;
+		text_col[2] = 0;
 
 		//选中状态框色
-		rect_col[0] = 138;//115//199
-		rect_col[1] = 3;//100//200
-		rect_col[2] = 3;//119//0
+		rect_col[0] = 255;//115//199
+		rect_col[1] = 255;//100//200
+		rect_col[2] = 255;//119//0
 
 		if (rescaleText) text_scale = 0.40;
 	}
 	//提示约束框颜色
 	if (about) {
-		rect_col[0] = 36;
-		rect_col[1] = 40;
-		rect_col[2] = 47;
+		rect_col[0] = 0;
+		rect_col[1] = 0;
+		rect_col[2] = 0;
 		//约束框字体颜色
 		text_col[0] = 223;
 		text_col[1] = 222;
@@ -71,9 +71,9 @@ void draw_menu_line(std::string caption, float lineWidth, float lineHeight, floa
 	}
 	//底部文本框颜色
 	if (Bottom) {
-		rect_col[0] = 138;//128
-		rect_col[1] = 3;//149
-		rect_col[2] = 3;//154
+		rect_col[0] = 0;//128
+		rect_col[1] = 0;//149
+		rect_col[2] = 0;//154
 
 		//标题字体颜色
 		text_col[0] = 255;
@@ -1044,8 +1044,12 @@ bool process_motorcycle_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(u8"摩托车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(u8"摩托车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexMotorcycle + 1, lineCount);
 			about = true;//启用独有约束色
@@ -1176,8 +1180,12 @@ bool process_aircraft_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(u8"飞机", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(u8"飞机", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexaircraft + 1, lineCount);
 			about = true;//启用独有约束色
@@ -1307,8 +1315,12 @@ bool process_helicopter_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(u8"直升机", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(u8"直升机", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexhelicopter + 1, lineCount);
 			about = true;//启用独有约束色
@@ -1438,8 +1450,12 @@ bool process_aship_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(u8"船舶", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(u8"船舶", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexaship + 1, lineCount);
 			about = true;//启用独有约束色
@@ -1567,8 +1583,12 @@ bool process_Bicycle_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(u8"自行车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(u8"自行车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexBicycle + 1, lineCount);
 			about = true;//启用独有约束色
@@ -1695,8 +1715,12 @@ bool process_SuperCar_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(u8"超级跑车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(u8"超级跑车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexSuperCar + 1, lineCount);
 			about = true;//启用独有约束色
@@ -1827,8 +1851,12 @@ bool process_SportsCar_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(u8"跑车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(u8"跑车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexSportsCar + 1, lineCount);
 			about = true;//启用独有约束色
@@ -1960,8 +1988,12 @@ bool process_jindianSportsCar_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(u8"经典跑车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(u8"经典跑车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexJindianSportsCar + 1, lineCount);
 			about = true;//启用独有约束色
@@ -2090,8 +2122,12 @@ bool process_Coupe_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(u8"轿跑车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(u8"轿跑车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexCoupe + 1, lineCount);
 			about = true;//启用独有约束色
@@ -2221,8 +2257,12 @@ bool process_Muscle_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(u8"肌肉车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(u8"肌肉车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexMuscle + 1, lineCount);
 			about = true;//启用独有约束色
@@ -2352,8 +2392,12 @@ bool process_CrossCountry_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(u8"越野车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(u8"越野车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexCrossCountry + 1, lineCount);
 			about = true;//启用独有约束色
@@ -2483,8 +2527,12 @@ bool process_SportsSUVS_Vehicle_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(u8"运动休旅车 SUVS", lineWidth, 15.0, 15.0, 25.0, 55.0, false, true);
+			//draw_menu_line(u8"运动休旅车 SUVS", lineWidth, 15.0, 15.0, 25.0, 55.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexSportsSUVS + 1, lineCount);
 			about = true;//启用独有约束色
@@ -2617,8 +2665,12 @@ bool process_Car_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(u8"轿车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(u8"轿车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexCar + 1, lineCount);
 			about = true;//启用独有约束色
@@ -2747,8 +2799,12 @@ bool process_Small_Car_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(u8"小型汽车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(u8"小型汽车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexSmallCar + 1, lineCount);
 			about = true;//启用独有约束色
@@ -2876,8 +2932,12 @@ bool process_PickUp_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(u8"皮卡 PICKUPS", lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			//draw_menu_line(u8"皮卡 PICKUPS", lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexPickUp + 1, lineCount);
 			about = true;//启用独有约束色
@@ -3007,8 +3067,12 @@ bool process_Box_Car_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(u8"厢型车 VANS", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(u8"厢型车 VANS", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexBoxCar + 1, lineCount);
 			about = true;//启用独有约束色
@@ -3139,8 +3203,12 @@ bool process_Commercial_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(u8"商用、工业车", lineWidth, 15.0, 15.0, 25.0, 80.0, false, true);
+			//draw_menu_line(u8"商用、工业车", lineWidth, 15.0, 15.0, 25.0, 80.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexCommercial + 1, lineCount);
 			about = true;//启用独有约束色
@@ -3271,8 +3339,12 @@ bool process_ServiceXClass_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(u8"服务类", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(u8"服务类", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexServiceXClass + 1, lineCount);
 			about = true;//启用独有约束色
@@ -3401,8 +3473,12 @@ bool process_Trailer_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(u8"拖车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(u8"拖车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexTrailer + 1, lineCount);
 			about = true;//启用独有约束色
@@ -3532,8 +3608,12 @@ bool process_Emergency_Vehicle_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(u8"紧急车辆", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(u8"紧急车辆", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexEmergencyVehicle + 1, lineCount);
 			about = true;//启用独有约束色
@@ -3680,7 +3760,11 @@ void process_train_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
+			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME					   %d / %d", activeLineIndexTrain + 1, lineCount);
 			about = true;//启用独有约束色
@@ -3787,7 +3871,11 @@ void process_Standardcar_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
+			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME					   %d / %d", activeLineIndexStandardcar + 1, lineCount);
 			about = true;//启用独有约束色
@@ -3915,8 +4003,12 @@ void process_player_menu()
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// 绘图菜单
-			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME					   %d / %d", activeLineIndexPlayer + 1, lineCount);
 			about = true;//启用独有约束色
@@ -4093,8 +4185,12 @@ void process_weapon_menu()
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexWeapon + 1, lineCount);
 			about = true;//启用独有约束色
@@ -4374,8 +4470,12 @@ void process_veh_menu()
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME					    %d / %d", activeLineIndexVeh + 1, lineCount);
 			about = true;//启用独有约束色
@@ -4544,8 +4644,12 @@ void process_world_menu()
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexWorld + 1, lineCount);
 			about = true;//启用独有约束色
@@ -4657,8 +4761,12 @@ void process_time_menu()
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexTime + 1, lineCount);
 			about = true;//启用独有约束色
@@ -4784,8 +4892,12 @@ void process_weather_menu()
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME					   %d / %d", activeLineIndexWeather + 1, lineCount);
 			about = true;//启用独有约束色
@@ -4907,8 +5019,12 @@ void process_misc_menu()
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
-			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexMisc + 1, lineCount);
 			about = true;//启用独有约束色
@@ -5015,7 +5131,11 @@ void process_model_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
+			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME					   %d / %d", activeLineIndexModel + 1, lineCount);
 			about = true;//启用独有约束色
@@ -5097,7 +5217,6 @@ void process_main_menu()
 	//set_status_text(statusText);
 
 	
-	
 	const float lineWidth = 250.0;
 	const int lineCount = 9;
 
@@ -5132,9 +5251,14 @@ other
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
+			//是否已加载流式纹理
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// 绘图菜单      字符串标题，行宽度，  行高，  行顶， 行左，文本左，活动，标题
 			float titleValue = 0.0;
-			draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
+			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
 			char caption2[32];
 			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexMain + 1, lineCount);
 			about = true;//启用独有约束色
