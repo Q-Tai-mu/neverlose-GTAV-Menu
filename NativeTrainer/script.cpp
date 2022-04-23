@@ -17,9 +17,9 @@
 #include "keyboard.h"
 #include <string>
 #include <ctime>
-
+#include < vector> 
 #include <iostream>
-
+using namespace std;
 #pragma warning(disable : 4244 4305) // double <-> float conversions
 bool about = false;//约束提示框背景色是否渲染
 bool Bottom = false;//最底框色
@@ -1025,6 +1025,487 @@ std::string line_as_str(std::string text, bool* pState)
 }
 
 
+
+int activeLineIndexDLCE = 0;
+int activeLineIndexDLCEItem = 0;
+//定义所有dlc
+LPCSTR DLCE1[50][100] = {
+	{"ELEGY2","KHAMELION","HOTKNIFE","CARBONRS"}
+};
+LPCSTR DLCE2[50][100] = {
+        {"tampa"}
+};
+LPCSTR DLC3[50][100] = {
+        {"BTYPE2","lurcher","Faction","moonbeam"}
+};
+LPCSTR DLC4[50][100] = {
+        {"BIFTA","KALAHARI","PARADISE","ELEGY2"}
+};
+LPCSTR DLC5[50][100] = {
+        {"BTYPE"}
+};
+LPCSTR DLC6[50][100] = {
+        {"ALPHA","JESTER","JESTER2","TURISMOR","HUNTLEY","MASSACRO","MASSACRO2","ZENTORNO","THRUST"}
+};
+LPCSTR DLC7[50][100] = {
+        {"RHAPSODY","DUBSTA3","WARRENER","GLENDALE","BLADE","PANTO","PIGALLE"}
+};
+LPCSTR DLC8[50][100] = {
+        {"MONSTER","SOVEREIGN"}
+};
+LPCSTR DLC9[50][100] = {
+        {"COQUETTE2","SWIFT","BESRA","MILJET"}
+};
+LPCSTR DLC10[50][100] = {
+        {"FUROREGT","HAKUCHOU","INNOVATION"}
+};
+LPCSTR DLC11[50][100] = {
+        {"RATLOADER2","RATLOADER","SLAMVAN"}
+};
+LPCSTR DLC12[50][100] = {
+        {"DUKES","DUKES2","STALION","BLISTA2"}
+};
+LPCSTR DLC13[50][100] = {
+        {"SAVAGE","GUARDIAN","KURUMA","KURUMA2","CASCO","INSURGENT2"},
+		{"INSURGENT","TECHNICAL","LECTRO","ENDURO","HYDRA","VALKYRIE"}
+};
+LPCSTR DLC14[50][100] = {
+        {"BTYPE3","BANSHEE2","SULTANRS"}
+};
+LPCSTR DLC15[50][100] = {
+        {"BALLER3","BALLER4","BALLER5","BALLER6","CARGOBOB4","COG55","COG552","COGNOSCENTI"},
+		{"COGNOSCENTI2","DINGHY4","MAMBA","NIGHTSHADE","SCHAFTER3","SCHAFTER4","SCHAFTER5","SCHAFTER6"},
+		{"LIMO2","SEASHARK3","SPEEDER2","SUPERVOLITO2","SUPERVOLITO","TORO2","TROPIC2","VALKYRIE2"}
+};
+LPCSTR DLC16[50][100] = {
+        {"WINDSOR","SWIFT2","VIRGO","LUXOR2","FELTZER3","OSIRIS"},
+		{"T20","CHINO","COQUETTE3","BRAWLER","VINDICATOR","TORO"}
+};
+LPCSTR DLC17[50][100] = {
+        {"BESTIAGTS","BRICKADE","FMJ","NIMBUS","PFISTER811","PROTOTIPO","REAPER"},
+		{"RUMPO3","SEVEN70","TUG","VOLATUS","WINDSOR2","XLS","XLS2"}
+};
+LPCSTR DLC18[50][100] = {
+        {"BF400","BRIOSO","CLIFFHANGER","GARGOYLE","CONTENDER","LE7B","LYNX"},
+{"OMNIS","RALLYTRUCK","SHEAVA","TAMPA2","TROPHYTRUCK","TROPHYTRUCK2","TROPOS"}
+};
+LPCSTR DLC19[50][100] = {
+        {"avarus","blazer4","chimera","daemon2","defiler","esskey","faggio"},
+		{"faggio3","hakuchou2","manchez","nightblade","raptor","ratbike","sanctus"},
+		{"shotaro","tornado6","vortex","wolfsbane","youga2","zombiea","zombieb"}
+};
+LPCSTR DLC20[50][100] = {
+        {"blazer5","boxville5","comet3","diablous","diablous2","dune4","dune5","technical2"},
+		{"tempesta","elegy","fcr","fcr2","italigtb","italigtb2","nero","nero2"},
+		{"penetrator","phantom2","ruiner2","specter","specter2","voltic2","ruiner3","wastelander"}
+};
+LPCSTR DLC21[50][100] = {
+        {"gp1","infernus2","ruston","turismo2"}
+};
+LPCSTR DLC22[50][100] = {
+        {"apc","ardent","caddy3","cheetah2","dune3"},
+		{"halftrack","hauler2","insurgent3","nightshark","oppressor"},
+		{"phantom3","tampa3","technical3","torero","vagner"}
+};
+LPCSTR DLC23[50][100] = {
+        {"cyclone","vigilante","visione","rapidgt3","retinue","havok"},
+{"microlight","alphaz1","howard","pyro","tula","mogul"},
+{"rogue","seabreeze","starling","bombushka","nokota","hunter"}
+};
+LPCSTR DLC24[50][100] = {
+        {"raiden","khanjali","deluxo","comet4","chernobog","barrage","avenger","sc1","akula"},
+		{"gt500","comet5","pariah","riata","yosemite","thruster","stromberg","riot2","volatol"},
+		{"streiter","sentinel3","savestra","revolter","neon","kamacho","hustler","autarch","hermes"}
+};
+LPCSTR DLC25[50][100] = {
+        {"pbus2","patriot2","oppressor2","mule4","menacer","freecrawler","blimp3"},
+        {"speedo4","terbyte","swinger","strikeforce","stafford","scramjet","pounder2"}
+};
+LPCSTR DLC26[50][100] = {
+        {"bruiser2","bruiser","italigto","schlagen","rcbandito","deviant","deveste","vamos","tulip","toros","impaler"},
+        {"deathbike3","deathbike2","deathbike","clique","cerberus3","cerberus2","cerberus","brutus3","brutus2","brutus","bruiser3"},
+        {"issi5","issi4","imperator3","imperator2","imperator","impaler4","impaler3","impaler2","dominator6","dominator5","dominator4"},
+        {"zr380","slamvan6","slamvan5","slamvan4","scarab3","scarab2","scarab","monster5","monster4","monster3","issi6"}
+};
+LPCSTR DLC27[50][100] = {
+        {"hellion","Novak","jugular","s80","gauntlet4","peyote2","paragon","paragon2","krieger","thrax","drafter"},
+        {"emerus","locust","neo","caracara2","issi7","zorrusso","zion3","rrocket","nebula","gauntlet3","Dynasty"}
+};
+LPCSTR DLC28[50][100] = {
+        {"minitank","komoda","kanjo","jb7002","imorgon","furia","formula2","formula","everon","asbo"},
+        {"zhaba","yosemite2","vstr","vagrant","sultan2","sugoi","stryder","retinue2","rebla","outlaw"}
+};
+LPCSTR DLC29[50][100] = {
+        {"landstalker2","glendale2","gauntlet5","openwheel2","coquette4","club","openwheel1","dukes3"},
+        {"sultan2","youga3","yosemite3","tigon","seminole2","peyote3","penumbra2","manana2"}
+};
+LPCSTR DLC30[50][100] = {
+        {"dinghy5","squaddie","veto2","veto","seasparrow3","seasparrow2","annihilator2"},
+        {"patrolboat","alkonost","vetir","weevil","slamtruck","toreador","italirsx"},
+        {"kosatka","manchez2","winky","longfin","verus","brioso2","avisa"}
+};
+LPCSTR DLC31[50][100] = {
+        {"calico","comet6","cypher","dominator7","dominator8","euros","freightcar2","futo2","growler"},
+        {"zr350","warrener2","vectre","tailgater2","sultan3","rt3000","remus","previon","jester4"}
+};
+LPCSTR DLC32[50][100] = {
+        {"astron","baller7","buffalo4","champion","cinquemila","comet7","deity","granger2"},
+        {"ignus","iwagen","jubilee","mule5","patriot3","reever","shinobi","youga4"}
+};
+/**
+ *  通用载具模型生成函数
+ * @param lpcstr 车辆数组
+ * @param activeIndex 页数
+ * @param activeIndexItem 子页数
+ * @param tailCoordinates  底部菜单位置y坐标
+ * @return
+ */
+bool process_DLCE_menu(LPCSTR lpcstr[50][100], int activeIndex, int activeIndexItem, float tailCoordinates) {
+
+	DWORD waitTime = 150;
+	const int lineCount = activeIndex;
+	const int itemCount = activeIndexItem;
+	const int itemCountLastLine = activeIndexItem;
+	const float lineWidth = 250.0;
+	double tailcorrdinates2 = 0.0;
+	while (true)
+	{
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexDLCE + 1, lineCount);
+			about = true;
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;
+			for (int i = 0; i < itemCount; i++) {
+				if (strlen(lpcstr[activeLineIndexDLCE][i])) {
+					draw_menu_line(lpcstr[activeLineIndexDLCE][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+					tailcorrdinates2 = 91. + i * 27.5 + 29.0;
+				}
+					
+			}	
+			draw_menu_line(line_as_str(lpcstr[activeLineIndexDLCE][activeLineIndexDLCEItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexDLCEItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0,tailcorrdinates2, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+			LPCSTR modelName = lpcstr[activeLineIndexDLCE][activeLineIndexDLCEItem];
+			DWORD model = GAMEPLAY::GET_HASH_KEY((char*)modelName);
+			if (STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))
+			{
+				STREAMING::REQUEST_MODEL(model);
+				while (!STREAMING::HAS_MODEL_LOADED(model)) WAIT(0);
+				Vector3 coords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(PLAYER::PLAYER_PED_ID(), 0.0, 5.0, 0.0);
+				Vehicle veh = VEHICLE::CREATE_VEHICLE(model, coords.x, coords.y, coords.z, 0.0, 1, 1);
+				VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(veh);
+
+				if (featureVehmotorcycle)
+				{
+					ENTITY::SET_ENTITY_HEADING(veh, ENTITY::GET_ENTITY_HEADING(PLAYER::PLAYER_PED_ID()));
+					PED::SET_PED_INTO_VEHICLE(PLAYER::PLAYER_PED_ID(), veh, -1);
+				}
+
+				WAIT(0);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				ENTITY::SET_VEHICLE_AS_NO_LONGER_NEEDED(&veh);
+
+				char statusText[32];
+				sprintf_s(statusText, "%s spawned", modelName);
+				set_status_text(statusText);
+
+				return true;
+			}
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexDLCE++;
+					if (activeLineIndexDLCE == lineCount)
+						activeLineIndexDLCE = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexDLCE == 0)
+							activeLineIndexDLCE = lineCount;
+						activeLineIndexDLCE--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexDLCEItem == 0)
+								activeLineIndexDLCEItem = (activeLineIndexDLCE == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexDLCEItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexDLCEItem++;
+								int itemsMax = (activeLineIndexDLCE == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexDLCEItem == itemsMax)
+									activeLineIndexDLCEItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexDLCE == (lineCount - 1))
+			if (activeLineIndexDLCEItem >= itemCountLastLine)
+				activeLineIndexDLCEItem = 0;
+	}
+	return false;
+
+
+	return false;
+}
+
+ 
+
+int activeLineIndexDLC = 0;
+int activeLineIndexDLCItem = 0;
+LPCSTR DLC[4][8] = {
+	{u8"典藏版",u8"万圣节狂欢",u8"沙滩狂欢",u8"情人节大屠杀",u8"高端商务",u8"自以为潮",u8"美国独立日",u8"飞行学校"},
+	{u8"团队生存",u8"圣诞节庆",u8"次时代回归",u8"抢劫任务",u8"做我的情人",u8"权贵天下",u8"不义之财",u8"富贵险中求"},
+	{u8"精彩的表演",u8"狂野飙客",u8"进出口大亨",u8"特殊载具巡回赛",u8"军火走私",u8"走私大暴走",u8"末日抢劫",u8"南圣安地列斯超级系列赛"},
+	{u8"不夜城",u8"竞技场之战",u8"名钻假日赌城",u8"名钻赌场豪劫",u8"洛圣都夏日特辑",u8"佩里科岛抢劫",u8"洛圣都改装车夏季",u8"合约"}
+};
+
+void process_DLC_menu() {
+	DWORD waitTime = 150;
+	const int lineCount = 4;
+	const int itemCount = 8;
+	const int itemCountLastLine = 8;
+	const float lineWidth = 250.0;
+	while (true)
+	{
+		// timed menu draw, used for pause after active line switch
+		DWORD maxTickCount = GetTickCount() + waitTime;
+		do
+		{
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
+			//定制图片标题
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
+			// draw menu
+			//draw_menu_line(u8"摩托车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
+			char caption2[32];
+			sprintf_s(caption2, u8"HOME						%d / %d", activeLineIndexDLC + 1, lineCount);
+			about = true;//启用独有约束色
+			draw_menu_line(caption2, lineWidth, 2.0, 70.0, 25.0, 5.0, false, false);
+			about = false;//关闭独有约束色
+			for (int i = 0; i < itemCount; i++)
+				if (strlen(DLC[activeLineIndexDLC][i]))
+					draw_menu_line(DLC[activeLineIndexDLC][i], 250.0, 5.0, 91. + i * 27.5, 25.0, 5.0, false, false);
+			draw_menu_line(line_as_str(DLC[activeLineIndexDLC][activeLineIndexDLCItem], NULL),
+				lineWidth, 5.0, 91. + activeLineIndexDLCItem * 27.5, 25.0, 5.0, true, false);
+			Bottom = true;
+			draw_menu_line(u8"1.58   	   NEVERLOSE 免费		0.2.1", lineWidth, 5.0, 313.5, 25.0, 5.0, false, false);
+			Bottom = false;
+			update_features();
+			WAIT(0);
+		} while (GetTickCount() < maxTickCount);
+		waitTime = 0;
+
+		bool bSelect, bBack, bUp, bDown, bLeft, bRight;
+		get_button_state(&bSelect, &bBack, &bUp, &bDown, &bLeft, &bRight);
+
+		if (bSelect)
+		{
+			menu_beep();
+					
+			switch (activeLineIndexDLCItem)
+			{
+			case 0:process_DLCE_menu(DLCE1, 1, 4, 156.5);
+				;
+				break;
+			case 1:process_DLCE_menu(DLCE2, 1, 1, 156.5);
+				;
+				break;
+			case 2:process_DLCE_menu(DLC3, 1, 4, 156.5);
+				;
+				break;
+			case 3:process_DLCE_menu(DLC4, 1, 4, 156.5);
+				;
+				break;
+			case 4:process_DLCE_menu(DLC5, 1, 1, 156.5);
+				;
+				break;
+			case 5:process_DLCE_menu(DLC6, 1, 9, 156.5);
+				;
+				break;
+			case 6:process_DLCE_menu(DLC7, 1, 7, 156.5);
+				;
+				break;
+			case 7:process_DLCE_menu(DLC8, 1, 2, 156.5);
+				;
+				break;
+			case 8:process_DLCE_menu(DLC9, 1, 4, 156.5);
+				
+				;
+				break;
+			case 9:process_DLCE_menu(DLC10, 1, 3, 156.5);
+				
+				;
+				break;
+			case 10:process_DLCE_menu(DLC11, 1, 3, 156.5);
+				;
+				break;
+			case 11:process_DLCE_menu(DLC12, 1, 4, 156.5);
+				;
+				break;
+			case 12:process_DLCE_menu(DLC13, 2, 6, 156.5);
+				;
+				break;
+			case 13:process_DLCE_menu(DLC14, 1, 3, 156.5);
+				;
+				break;
+			case 14:process_DLCE_menu(DLC15, 3, 8, 156.5);
+				;
+				break;
+			case 15:process_DLCE_menu(DLC16, 2, 6, 156.5);
+				;
+				break;
+			case 16:process_DLCE_menu(DLC17, 2, 7, 156.5);
+				;
+				break;
+			case 17:process_DLCE_menu(DLC18, 2, 7, 156.5);
+				;
+				break;
+			case 18:process_DLCE_menu(DLC19, 3, 7, 156.5);
+				;
+				break;
+			case 19:process_DLCE_menu(DLC20, 3, 8, 156.5);
+				;
+				break;
+			case 20:process_DLCE_menu(DLC21, 1, 4, 156.5);
+				;
+				break;
+			case 21:process_DLCE_menu(DLC22, 3, 5, 156.5);
+				;
+				break;
+			case 22:process_DLCE_menu(DLC23, 3, 6, 156.5);
+				;
+				break;
+			case 23:process_DLCE_menu(DLC24, 3, 9, 156.5);
+				;
+				break;
+			case 24:process_DLCE_menu(DLC25, 2, 7, 156.5);
+				;
+				break;
+			case 25:process_DLCE_menu(DLC26, 3, 11, 156.5);
+				;
+				break;
+			case 26:process_DLCE_menu(DLC27, 2, 11, 156.5);
+				;
+				break;
+			case 27:process_DLCE_menu(DLC28, 2, 10, 156.5);
+				;
+				break;
+			case 28:process_DLCE_menu(DLC29, 2, 8, 156.5);
+				;
+				break;
+			case 29:process_DLCE_menu(DLC30, 3, 7, 156.5);
+				;
+				break;
+			case 30:process_DLCE_menu(DLC31, 2, 9, 156.5);
+				;
+				break;
+			case 31:process_DLCE_menu(DLC32, 2, 8, 156.5);
+				;
+				break;
+			
+			}
+			
+			waitTime = 200;
+		}
+		else
+			if (bBack)
+			{
+				menu_beep();
+				break;
+			}
+			else
+				if (bRight)
+				{
+					//右
+
+					menu_beep();
+					activeLineIndexDLC++;
+					if (activeLineIndexDLC == lineCount)
+						activeLineIndexDLC = 0;
+					waitTime = 200;
+				}
+				else
+					if (bLeft)
+					{
+						//左
+
+						menu_beep();
+						if (activeLineIndexDLC == 0)
+							activeLineIndexDLC = lineCount;
+						activeLineIndexDLC--;
+						waitTime = 200;
+					}
+					else
+						if (bUp)
+						{
+							//上
+							menu_beep();
+							if (activeLineIndexDLCItem == 0)
+								activeLineIndexDLCItem = (activeLineIndexDLC == (lineCount - 1)) ? itemCountLastLine : itemCount;
+							activeLineIndexDLCItem--;
+							waitTime = 100;
+						}
+						else
+							if (bDown)
+							{
+								//下
+								menu_beep();
+								activeLineIndexDLCItem++;
+								int itemsMax = (activeLineIndexDLC == (lineCount - 1)) ? itemCountLastLine : itemCount;
+								if (activeLineIndexDLCItem == itemsMax)
+									activeLineIndexDLCItem = 0;
+								waitTime = 100;
+							}
+		if (activeLineIndexDLC == (lineCount - 1))
+			if (activeLineIndexDLCItem >= itemCountLastLine)
+				activeLineIndexDLCItem = 0;
+	}
+	
+}
+
+
 int activeLineIndexMotorcycle = 0;
 int activeLineIndexMotorcycleItem = 0;
 LPCSTR motorcycles[2][10] = {
@@ -1044,9 +1525,9 @@ bool process_motorcycle_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(u8"摩托车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -1180,9 +1661,9 @@ bool process_aircraft_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(u8"飞机", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -1315,9 +1796,9 @@ bool process_helicopter_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(u8"直升机", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -1450,9 +1931,9 @@ bool process_aship_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(u8"船舶", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -1583,9 +2064,9 @@ bool process_Bicycle_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(u8"自行车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -1715,9 +2196,9 @@ bool process_SuperCar_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(u8"超级跑车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -1851,9 +2332,9 @@ bool process_SportsCar_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(u8"跑车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -1988,9 +2469,9 @@ bool process_jindianSportsCar_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(u8"经典跑车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -2122,9 +2603,9 @@ bool process_Coupe_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(u8"轿跑车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -2257,9 +2738,9 @@ bool process_Muscle_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(u8"肌肉车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -2392,9 +2873,9 @@ bool process_CrossCountry_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(u8"越野车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -2527,9 +3008,9 @@ bool process_SportsSUVS_Vehicle_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(u8"运动休旅车 SUVS", lineWidth, 15.0, 15.0, 25.0, 55.0, false, true);
@@ -2665,9 +3146,9 @@ bool process_Car_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(u8"轿车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -2799,9 +3280,9 @@ bool process_Small_Car_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(u8"小型汽车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -2932,9 +3413,9 @@ bool process_PickUp_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(u8"皮卡 PICKUPS", lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
@@ -3067,9 +3548,9 @@ bool process_Box_Car_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(u8"厢型车 VANS", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -3203,9 +3684,9 @@ bool process_Commercial_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(u8"商用、工业车", lineWidth, 15.0, 15.0, 25.0, 80.0, false, true);
@@ -3339,9 +3820,9 @@ bool process_ServiceXClass_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(u8"服务类", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -3473,9 +3954,9 @@ bool process_Trailer_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(u8"拖车", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -3608,9 +4089,9 @@ bool process_Emergency_Vehicle_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(u8"紧急车辆", lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -3760,9 +4241,9 @@ void process_train_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
@@ -3871,9 +4352,9 @@ void process_Standardcar_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
@@ -4003,9 +4484,9 @@ void process_player_menu()
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// 绘图菜单
 			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
@@ -4185,9 +4666,9 @@ void process_weapon_menu()
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
@@ -4470,9 +4951,9 @@ void process_veh_menu()
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 75.0, false, true);
@@ -4510,7 +4991,7 @@ void process_veh_menu()
 			//if (process_carspawn_menu()) return
 			switch (activeLineIndexVeh)
 			{
-			case 0:
+			case 0:process_DLC_menu()
 				;
 				break;
 			case 1:process_Standardcar_menu();
@@ -4644,9 +5125,9 @@ void process_world_menu()
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -4761,9 +5242,9 @@ void process_time_menu()
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -4892,9 +5373,9 @@ void process_weather_menu()
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -5019,9 +5500,9 @@ void process_misc_menu()
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// draw menu
 			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
@@ -5131,9 +5612,9 @@ void process_model_menu() {
 		DWORD maxTickCount = GetTickCount() + waitTime;
 		do
 		{
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			//draw_menu_line(caption, lineWidth, 15.0, 15.0, 25.0, 105.0, false, true);
 			char caption2[32];
@@ -5205,7 +5686,26 @@ void process_model_menu() {
 
 int activeLineIndexMain = 0;
 
+/**
+ *  新UI界面
+ */
+void process_neverLose_main_menu() {
+    DWORD waitTime = 150;
+    while (true){
+        DWORD maxTickCount = GetTickCount() + waitTime;
+        do{
+            //绘制一个黑底布
+           // draw_menu_line("", , 15.0, 15.0, 25.0, 75.0, false, true);
+            //在黑布的基础上绘制左边白布
+            //在黑布的基础上绘制右边黑布
+            //在左边的白布上绘制按钮
+            //在右边的黑布上绘制子菜单
+            //在子菜单上绘制相关控件
 
+        }while (GetTickCount() < maxTickCount);
+        waitTime = 0;
+    }
+}
 
 void process_main_menu()
 {
@@ -5252,9 +5752,9 @@ other
 		do
 		{
 			//是否已加载流式纹理
-			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("shopui_title_gunclub")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("shopui_title_gunclub", 0);
+			if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED("arcadeui_badlands")) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT("arcadeui_badlands", 0);
 			//定制图片标题
-			GRAPHICS::DRAW_SPRITE("shopui_title_gunclub", "shopui_title_gunclub"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
+			GRAPHICS::DRAW_SPRITE("arcadeui_badlands", "arcadeui_badlands"/*"interaction_bgd"*/, 0.13f, 0.08f, 0.22f, 0.088f, 0.0f, 255, 255, 255, 255);
 			GRAPHICS::DRAW_RECT(0.15f, 0.15f, 0.01f, 0.02f, 255, 255, 255, 4);
 			// 绘图菜单      字符串标题，行宽度，  行高，  行顶， 行左，文本左，活动，标题
 			float titleValue = 0.0;
@@ -5409,32 +5909,34 @@ void reset_globals()
 void main()
 {
 	reset_globals();
-	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
-	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"GTA5 1.58 线下版本 免费使用");
-	// 提示声音
-	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
 
-	UI::_DRAW_NOTIFICATION(0, 0);
-
-	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
-	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"作者QQ：870993238");
-	// 提示声音
-	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
-
-	UI::_DRAW_NOTIFICATION(0, 0);
-
-	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
-	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"官网：https://q-tai-mu.github.io");
-	// 提示声音
-	PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
-
-	UI::_DRAW_NOTIFICATION(0, 0);
 	while (true)
 	{
 		if (trainer_switch_pressed())
 		{
+            UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
+            UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"GTA5 1.58 线下版本 免费使用");
+            // 提示声音
+            PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
+
+            UI::_DRAW_NOTIFICATION(0, 0);
+
+            UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
+            UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"作者QQ：870993238");
+            // 提示声音
+            PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
+
+            UI::_DRAW_NOTIFICATION(0, 0);
+
+            UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
+            UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(u8"官网：https://q-tai-mu.github.io");
+            // 提示声音
+            PlayFrontend("Phone_SoundSet_Default", "Text_Arrive_Tone");
+
+            UI::_DRAW_NOTIFICATION(0, 0);
 			menu_beep();
-			process_main_menu();
+			process_main_menu();//标准界面
+			//process_neverLose_main_menu();//整体新界面
 		}
 
 		update_features();
